@@ -41,8 +41,13 @@ THE SOFTWARE.
 
 using namespace cocos2d;
 
-static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, CCObject*>* pDict);
-static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray);
+// added by YoungJae Kwon 
+// to support CCNumber class parsing
+static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, CCObject*>* pDict, bool isUsingCCNumber);
+static void static_addItemToCCArray(id item, CCObject* pArray, bool isUsingCCNumber);
+//static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, CCObject*>* pDict);
+//static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray);
+
 
 static NSString *__suffixiPhoneRetinaDisplay =@"-hd";
 static NSString *__suffixiPad =@"-ipad";
@@ -122,8 +127,13 @@ static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray)
 	// add string value into array
     if ([item isKindOfClass:[NSString class]]) {
         CCString* pValue = new CCString([item UTF8String]);
+        if (!isUsingCCNumber) {
+            ((CCMutableArray<>*)pArray)->addObject(pValue);
+        }
+        else {
+            ((CCArray*)pArray)->addObject(pValue);
+        }
         
-        pArray->addObject(pValue);
         pValue->release();
         return;
     }
@@ -131,10 +141,38 @@ static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray)
 	// add number value into array(such as int, float, bool and so on)
     if ([item isKindOfClass:[NSNumber class]]) {
         NSString* pStr = [item stringValue];
+        if( !isUsingCCNumber )
+        {
         CCString* pValue = new CCString([pStr UTF8String]);
         
-        pArray->addObject(pValue);
+            ((CCMutableArray<>*)pArray)->addObject(pValue);
         pValue->release();
+        }
+        else
+        {
+            CCLog("array_type:%s",[item objCType]);
+            if( strcmp([item objCType], @encode(int)) == 0 ||
+               strcmp([item objCType], @encode(long)) == 0 ||
+               strcmp([item objCType], @encode(unsigned int)) == 0 ||
+               strcmp([item objCType], @encode(unsigned long)) == 0 ||
+               strcmp([item objCType], @encode(long long)) == 0 ||
+               strcmp([item objCType], @encode(unsigned long long)) == 0 )
+            {
+                ((CCArray*)pArray)->addObject( CCNumber<int>::numberWithValue([item intValue]) );
+            }
+            else if( strcmp([item objCType], @encode(float)) == 0 || 
+                    strcmp([item objCType], @encode(double)) == 0 )
+            {
+                ((CCArray*)pArray)->addObject( CCNumber<float>::numberWithValue([item floatValue]) );                
+            }
+            else if( strcmp([item objCType], @encode(bool)) == 0 )
+            {
+                ((CCArray*)pArray)->addObject( CCNumber<bool>::numberWithValue([item boolValue]) );                                
+            }
+            else {
+                CCAssert(0, "static_addValueToCCArray::Unknown value type paring");
+            }
+        }
         return;
     }
     
@@ -143,26 +181,48 @@ static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray)
         CCDictionary<std::string, CCObject*>* pDictItem = new CCDictionary<std::string, CCObject*>();
         for (id subKey in [item allKeys]) {
             id subValue = [item objectForKey:subKey];
-            static_addValueToCCDict(subKey, subValue, pDictItem);
+            static_addValueToCCDict(subKey, subValue, pDictItem, isUsingCCNumber);
         }
-        pArray->addObject(pDictItem);
+        if (!isUsingCCNumber) {
+            ((CCMutableArray<>*)pArray)->addObject(pDictItem);
+        }
+        else {
+            ((CCArray*)pArray)->addObject(pDictItem);
+        }
+
         pDictItem->release();
         return;
     }
     
     // add array value into array
     if ([item isKindOfClass:[NSArray class]]) {
+        if(!isUsingCCNumber)
+        {
+            
         CCMutableArray<CCObject*> *pArrayItem = new CCMutableArray<CCObject*>();
         for (id subItem in item) {
-            static_addItemToCCArray(subItem, pArrayItem);
+                static_addItemToCCArray(subItem, pArrayItem, isUsingCCNumber);
         }
-        pArray->addObject(pArrayItem);
+            ((CCMutableArray<>*)pArray)->addObject(pArrayItem);
         pArrayItem->release();
+        }
+        else
+        {
+
+            CCArray *pArrayItem = CCArray::array();
+            CCLog("adding item to array %p",pArrayItem);            
+            for (id subItem in item) {
+                
+                static_addItemToCCArray(subItem, pArrayItem, isUsingCCNumber);
+            }
+            ((CCArray*)pArray)->addObject(pArrayItem);
+            CCLog("to array %p added complete",pArrayItem);
+        }
         return;
     }
 }
 
-static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, CCObject*>* pDict)
+static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, CCObject*>* pDict, bool isUsingCCNumber)
 {
 	// the key must be a string
     CCAssert([key isKindOfClass:[NSString class]], "The key should be a string!");
@@ -173,7 +233,7 @@ static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, 
         CCDictionary<std::string, CCObject*>* pSubDict = new CCDictionary<std::string, CCObject*>();
         for (id subKey in [value allKeys]) {
             id subValue = [value objectForKey:subKey];
-            static_addValueToCCDict(subKey, subValue, pSubDict);
+            static_addValueToCCDict(subKey, subValue, pSubDict, isUsingCCNumber);
         }
         pDict->setObject(pSubDict, pKey);
         pSubDict->release();
@@ -192,21 +252,66 @@ static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, 
 	// the value is a number
     if ([value isKindOfClass:[NSNumber class]]) {
         NSString* pStr = [value stringValue];
+        if( !isUsingCCNumber )
+        {
         CCString* pValue = new CCString([pStr UTF8String]);
         
         pDict->setObject(pValue, pKey);
         pValue->release();
+        }
+        else
+        {
+            CCLog("dic_type:%s",[value objCType]);
+            if( strcmp([value objCType], @encode(int)) == 0 ||
+               strcmp([value objCType], @encode(long)) == 0 ||
+               strcmp([value objCType], @encode(unsigned int)) == 0 ||
+               strcmp([value objCType], @encode(unsigned long)) == 0 ||
+               strcmp([value objCType], @encode(long long)) == 0 ||
+              strcmp([value objCType], @encode(unsigned long long)) == 0 )
+            {
+                CCLog("added int:%d",[value intValue]);
+                pDict->setObject( CCNumber<int>::numberWithValue([value intValue]), pKey);
+            }
+            else if( strcmp([value objCType], @encode(float)) == 0 || 
+                    strcmp([value objCType], @encode(double)) == 0 )
+            {
+                CCLog("added float:%f",[value floatValue]);
+                pDict->setObject( CCNumber<float>::numberWithValue([value floatValue]), pKey);                
+            }
+            else if( strcmp([value objCType], @encode(bool)) == 0 )
+            {
+                CCLog("added bool:%d",[value boolValue]);                
+                pDict->setObject( CCNumber<bool>::numberWithValue([value boolValue]), pKey);                                
+            }
+            else {
+                CCAssert(0, "static_addValueToCCDict::Unknown value type paring");
+            }
+                
+
+        }
+
         return;
     }
 
 	// the value is a array
     if ([value isKindOfClass:[NSArray class]]) {
+        if( !isUsingCCNumber )
+        {
         CCMutableArray<CCObject*> *pArray = new CCMutableArray<CCObject*>();
         for (id item in value) {
-            static_addItemToCCArray(item, pArray);
+                static_addItemToCCArray(item, pArray, isUsingCCNumber);
         }
         pDict->setObject(pArray, pKey);
         pArray->release();
+        }
+        else
+        {
+            CCArray *pArray = CCArray::array();
+            for (id item in value) {
+                static_addItemToCCArray(item, pArray, isUsingCCNumber);
+            }
+            pDict->setObject(pArray, pKey);
+        }
         return;
     }
 }
@@ -416,15 +521,41 @@ namespace cocos2d {
         return pRet->m_sString.c_str();
     }
     
-    CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(const char *pFileName)
+	CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(const char *pFileName)
     {
-        CCDictionary<std::string, CCObject*> *ret = dictionaryWithContentsOfFileThreadSafe(pFileName);
+	      //         CCDictionary<std::string, CCObject*> *ret = dictionaryWithContentsOfFileThreadSafe(pFileName, false);
+	      // ret->autorelease();
+	      // 
+	      // return ret;
+		dictionaryWithContentsOfFile(pFileName, false);
+    }
+
+    CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFileThreadSafe(const char *pFileName)
+    {
+        // NSString* pPath = [NSString stringWithUTF8String:pFileName];
+        // NSDictionary* pDict = [NSDictionary dictionaryWithContentsOfFile:pPath];
+        // 
+        // CCDictionary<std::string, CCObject*>* pRet = new CCDictionary<std::string, CCObject*>();
+        // for (id key in [pDict allKeys]) {
+        //     id value = [pDict objectForKey:key];
+        //     static_addValueToCCDict(key, value, pRet, false);
+        // }
+        // 
+        // return pRet;
+		return dictionaryWithContentsOfFileThreadSafe(pFileName, false);
+    }
+    
+    // added by YoungJae Kwon
+    CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(const char *pFileName, bool isUsingCCNumber)
+    {
+        CCDictionary<std::string, CCObject*> *ret = dictionaryWithContentsOfFileThreadSafe(pFileName, isUsingCCNumber);
 	      ret->autorelease();
 	      
 	      return ret;
     }
     
-    CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFileThreadSafe(const char *pFileName)
+	// added by YoungJae Kwon
+	CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFileThreadSafe(const char *pFileName, bool isUsingCCNumber)
     {
         NSString* pPath = [NSString stringWithUTF8String:pFileName];
         NSDictionary* pDict = [NSDictionary dictionaryWithContentsOfFile:pPath];
@@ -432,12 +563,12 @@ namespace cocos2d {
         CCDictionary<std::string, CCObject*>* pRet = new CCDictionary<std::string, CCObject*>();
         for (id key in [pDict allKeys]) {
             id value = [pDict objectForKey:key];
-            static_addValueToCCDict(key, value, pRet);
+            static_addValueToCCDict(key, value, pRet, isUsingCCNumber);
         }
 
         return pRet;
     }
-    
+
     unsigned char* CCFileUtils::getFileData(const char* pszFileName, const char* pszMode, unsigned long * pSize)
     {
         unsigned char * pBuffer = NULL;
@@ -472,7 +603,9 @@ namespace cocos2d {
     }
 
     // notification support when getFileData from a invalid file
-    static bool s_bPopupNotify = true;
+    //static bool s_bPopupNotify = true;
+	// modified by LEETAEHO 11.06.30
+	static bool s_bPopupNotify = false;
 
     void CCFileUtils::setIsPopupNotify(bool bNotify)
     {

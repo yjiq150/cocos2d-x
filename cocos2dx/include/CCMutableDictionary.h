@@ -35,7 +35,7 @@ using namespace std;
 namespace   cocos2d {
 class CCString;
 
-template<class _KeyT, class _ValueT = CCObject*>
+template<class _KeyT = string, class _ValueT = CCObject*>
 class CCMutableDictionary : public CCObject
 {
 public:
@@ -215,7 +215,8 @@ public:
 	static CCMutableDictionary<_KeyT, _ValueT>* dictionaryWithDictionary(CCMutableDictionary<_KeyT, _ValueT>* srcDict)
 	{
 		CCMutableDictionary<_KeyT, _ValueT>* pNewDict = new CCMutableDictionary<_KeyT, _ValueT>();
-
+		pNewDict->autorelease();
+		
 		srcDict->begin();
 
 		_KeyT key;
@@ -230,6 +231,24 @@ public:
 
 		return pNewDict;
 	}
+	
+	// Added by Youngjae Kwon
+    static CCMutableDictionary<_KeyT, _ValueT>* dictionaryWithObject(_ValueT pObject, _KeyT key)
+	{
+		CCMutableDictionary<_KeyT, _ValueT>* pNewDict = new CCMutableDictionary<_KeyT, _ValueT>();
+		pNewDict->autorelease();        
+
+        pNewDict->setObject(pObject, key);
+        
+		return pNewDict;
+	}
+    
+    // Added by Youngjae Kwon
+	virtual std::string getClassName()
+    { 
+        std::string className("CCMutableDictionary");
+        return className;   
+    }
 };
 
 #define CCDictionary	CCMutableDictionary

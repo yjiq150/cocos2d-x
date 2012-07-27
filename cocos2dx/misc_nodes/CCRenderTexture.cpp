@@ -33,6 +33,8 @@ THE SOFTWARE.
 #include "CCFileUtils.h"
 #include "CCGL.h"
 
+#include "CCRawImageData.h"
+
 namespace cocos2d { 
 
 // implementation CCRenderTexture
@@ -63,6 +65,15 @@ void CCRenderTexture::setSprite(CCSprite* var)
 	m_pSprite = var;
 }
 
+string CCRenderTexture::getRenderTextureName()
+{
+    return renderTextureName;
+}
+void CCRenderTexture::setRenderTextureName(string var)
+{
+    renderTextureName = var;
+}
+    
 CCRenderTexture * CCRenderTexture::renderTextureWithWidthAndHeight(int w, int h, CCTexture2DPixelFormat eFormat)
 {
     CCRenderTexture *pRet = new CCRenderTexture();
@@ -101,6 +112,8 @@ bool CCRenderTexture::initWithWidthAndHeight(int w, int h, CCTexture2DPixelForma
     bool bRet = false;
     do 
     {
+		this->setContentSize(CCSizeMake(w,h)); // added by YoungJae Kwon
+		
         w *= (int)CC_CONTENT_SCALE_FACTOR();
         h *= (int)CC_CONTENT_SCALE_FACTOR();
 
@@ -156,6 +169,37 @@ bool CCRenderTexture::initWithWidthAndHeight(int w, int h, CCTexture2DPixelForma
     
 }
 
+// added by YoungJAe Kwon
+// when app restored from lockscreen in ANDROID, reloaded VolatileTexture should be rebinded to FBO
+void CCRenderTexture::reloadAfterWakeup()
+{
+
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &m_nOldFBO);
+
+	
+	// generate FBO
+	ccglGenFramebuffers(1, &m_uFBO);
+	ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_uFBO);
+	
+	// associate texture with FBO
+	ccglFramebufferTexture2D(CC_GL_FRAMEBUFFER, CC_GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pTexture->getName(), 0);
+	
+	// check if it worked (probably worth doing :) )
+	GLuint status = ccglCheckFramebufferStatus(CC_GL_FRAMEBUFFER);
+	if (status != CC_GL_FRAMEBUFFER_COMPLETE)
+	{
+		CCAssert(0, "Render Texture : Could not attach texture to framebuffer");
+	}
+	
+	m_pTexture->setAliasTexParameters();
+
+	ccBlendFunc tBlendFunc = {GL_ONE, GL_ONE_MINUS_SRC_ALPHA };
+	m_pSprite->setBlendFunc(tBlendFunc);
+	
+	ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
+
+}
+	
 void CCRenderTexture::begin()
 {
 	// Save the current matrix
@@ -204,18 +248,11 @@ void CCRenderTexture::beginWithClear(float r, float g, float b, float a)
 	glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);     
 }
 
-void CCRenderTexture::end(bool bIsTOCacheTexture)
-{
-	ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
-	// Restore the original matrix and viewport
-	glPopMatrix();
-	CCSize size = CCDirector::sharedDirector()->getDisplaySizeInPixels();
-	//	glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
-	CCDirector::sharedDirector()->getOpenGLView()->setViewPortInPoints(0, 0, size.width, size.height);
-
 #if CC_ENABLE_CACHE_TEXTTURE_DATA
-	if (bIsTOCacheTexture)
+	void CCRenderTexture::end(bool bIsTOCasheTexture)
 	{
+		if (bIsTOCasheTexture)
+		{
 		CC_SAFE_DELETE(m_pUITextureImage);
 
 		// to get the rendered texture data
@@ -232,8 +269,25 @@ void CCRenderTexture::end(bool bIsTOCacheTexture)
 			CCLOG("Cache rendertexture failed!");
 		}
 	}
+
+		ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
+		// Restore the original matrix and viewport
+		glPopMatrix();
+		CCSize size = CCDirector::sharedDirector()->getDisplaySizeInPixels();
+		//	glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
+		CCDirector::sharedDirector()->getOpenGLView()->setViewPortInPoints(0, 0, size.width, size.height);
+	}
+#else
+	void CCRenderTexture::end()
+	{
+		ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
+		// Restore the original matrix and viewport
+		glPopMatrix();
+		CCSize size = CCDirector::sharedDirector()->getDisplaySizeInPixels();
+	//	glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
+		CCDirector::sharedDirector()->getOpenGLView()->setViewPortInPoints(0, 0, size.width, size.height);
+	}
 #endif
-}
 
 void CCRenderTexture::clear(float r, float g, float b, float a)
 {
@@ -342,7 +396,11 @@ bool CCRenderTexture::getUIImageFromBuffer(CCImage *pImage, int x, int y, int nW
 		this->begin();
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0,0,nReadBufferWidth,nReadBufferHeight,GL_RGBA,GL_UNSIGNED_BYTE, pTempData);
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+    	this->end();    
+#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 		this->end(false);
+#endif        
 
 		// to get the actual texture data 
 		// #640 the image read from rendertexture is upseted
@@ -360,6 +418,168 @@ bool CCRenderTexture::getUIImageFromBuffer(CCImage *pImage, int x, int y, int nW
 	CC_SAFE_DELETE_ARRAY(pTempData);
 
 	return bRet;
+}
+
+// Added by Youngjae Kwon
+bool CCRenderTexture::saveBufferUpsideDown(const char *szFilePath, int x, int y, int nWidth, int nHeight)
+{
+	bool bRet = false;
+
+	CCImage *pImage = new CCImage();
+	if (pImage != NULL && getUIImageFromBufferUpsideDown(pImage, x, y, nWidth, nHeight))
+	{
+		bRet = pImage->saveToFile(szFilePath);
+	}
+	
+	CC_SAFE_DELETE(pImage);
+	return bRet;
+}
+// Added by Youngjae Kwon
+bool CCRenderTexture::getUIImageFromBufferUpsideDown(CCImage *pImage, int x, int y, int nWidth, int nHeight)
+{
+	if (NULL == pImage || NULL == m_pTexture)
+	{
+		return false;
+	}
+	
+	CCSize s = m_pTexture->getContentSizeInPixels();
+	int tx = (int)s.width;
+	int ty = (int)s.height;
+	
+	if (x < 0 || x >= tx || y < 0 || y >= ty)
+	{
+		return false;
+	}
+	
+	if (nWidth < 0 
+		|| nHeight < 0
+		|| (0 == nWidth && 0 != nHeight)
+		|| (0 == nHeight && 0 != nWidth))
+	{
+		return false;
+	}
+	
+	// to get the image size to save
+	//		if the saving image domain exeeds the buffer texture domain,
+	//		it should be cut
+	int nSavedBufferWidth = nWidth;
+	int nSavedBufferHeight = nHeight;
+	if (0 == nWidth)
+	{
+		nSavedBufferWidth = tx;
+	}
+	if (0 == nHeight)
+	{
+		nSavedBufferHeight = ty;
+	}
+	nSavedBufferWidth = x + nSavedBufferWidth > tx ? (tx - x): nSavedBufferWidth;
+	nSavedBufferHeight = y + nSavedBufferHeight > ty ? (ty - y): nSavedBufferHeight;
+	
+	GLubyte *pBuffer = NULL;
+	GLubyte *pTempData = NULL;
+	bool bRet = false;
+	
+	do
+	{
+		CCAssert(m_ePixelFormat == kCCTexture2DPixelFormat_RGBA8888, "only RGBA8888 can be saved as image");
+		
+		CC_BREAK_IF(! (pBuffer = new GLubyte[nSavedBufferWidth * nSavedBufferHeight * 4]));
+		
+		// On some machines, like Samsung i9000, Motorola Defy,
+		// the dimension need to be a power of 2
+		int nReadBufferWidth = 0;
+		int nReadBufferHeight = 0;
+		int nMaxTextureSize = 0;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &nMaxTextureSize);
+		
+		nReadBufferWidth = ccNextPOT(tx);
+		nReadBufferHeight = ccNextPOT(ty);
+		
+		CC_BREAK_IF(0 == nReadBufferWidth || 0 == nReadBufferHeight);
+		CC_BREAK_IF(nReadBufferWidth > nMaxTextureSize || nReadBufferHeight > nMaxTextureSize);
+		
+		CC_BREAK_IF(! (pTempData = new GLubyte[nReadBufferWidth * nReadBufferHeight * 4]));
+		
+		this->begin();
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0,0,nReadBufferWidth,nReadBufferHeight,GL_RGBA,GL_UNSIGNED_BYTE, pTempData);
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+    	this->end();    
+#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+        this->end(false);        
+#endif
+	
+		
+		for (int i = 0; i < nSavedBufferHeight; ++i)
+		{
+			memcpy(&pBuffer[i * nSavedBufferWidth * 4], 
+				   &pTempData[(y + i) * nReadBufferWidth * 4 + x * 4], 
+				   nSavedBufferWidth * 4);
+		}
+		
+		bRet = pImage->initWithImageData(pBuffer, nSavedBufferWidth * nSavedBufferHeight * 4, CCImage::kFmtRawData, nSavedBufferWidth, nSavedBufferHeight, 8);
+	} while (0);
+	
+	CC_SAFE_DELETE_ARRAY(pBuffer);
+	CC_SAFE_DELETE_ARRAY(pTempData);
+	
+	return bRet;
+}
+	
+// Added by Youngjae Kwon
+CCRawImageData * CCRenderTexture::getRawImageFromBuffer(int format,CCRect cropFrame)
+{
+    GLubyte * pBuffer   = NULL;
+    GLubyte * pPixels   = NULL;
+    
+	if(! m_pTexture)
+		return NULL;
+
+	CCAssert(m_ePixelFormat == kCCTexture2DPixelFormat_RGBA8888, "only RGBA8888 can be saved as image");
+
+	
+   // CCSize s = m_pTexture->getContentSizeInPixels();
+	int tx = cropFrame.size.width;
+	int ty = cropFrame.size.height;
+
+	int bitsPerComponent = 8;
+	int bitsPerPixel = 32;
+
+	int bytesPerRow = (bitsPerPixel / 8) * tx;
+	int myDataLength = bytesPerRow * ty;
+
+	if(! (pBuffer = new GLubyte[tx * ty * 4])) return NULL;
+	if(! (pPixels = new GLubyte[tx * ty * 4])) return NULL; 
+
+	this->begin();
+	glReadPixels(cropFrame.origin.x,cropFrame.origin.y,tx,ty,GL_RGBA,GL_UNSIGNED_BYTE, pBuffer);
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+    this->end();    
+#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+    this->end(false);    
+#endif	
+
+
+	int x,y;
+
+	for(y = 0; y <ty; y++) {
+		for(x = 0; x <tx * 4; x++) {
+			pPixels[((ty - 1 - y) * tx * 4 + x)] = pBuffer[(y * 4 * tx + x)];
+		}
+	}
+	
+	
+	CCRawImageData* data = CCRawImageData::dataWithBytesNoCopy(pPixels,myDataLength);
+	
+	data->setInfo(cropFrame.size);
+
+    
+	// πˆ∆€¥¬ «ÿ¡¶
+     CC_SAFE_DELETE_ARRAY(pBuffer);
+	// NO COPY¿Ãπ«∑Œ «ÿ¡¶«œ∏È æ»µ . ≥™¡ﬂø° CCRawImageData∞° ø¿≈‰∏±∏Æ¡Ó µ…∂ß ¿⁄µø¿∏∑Œ pPixelµµ «ÿ¡¶
+     //CC_SAFE_DELETE_ARRAY(pPixels);
+	return data;
+	
 }
 
 

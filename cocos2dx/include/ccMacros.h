@@ -34,8 +34,17 @@ THE SOFTWARE.
 #include "CCCommon.h"
 #include "CCStdC.h"
 
+//added by YoungJae Kwon
+#define IS_TOUCH_INSIDE(target,touchLocation) (target && CCRect::CCRectContainsPoint(target->getRect(), target->getParent()->convertToNodeSpace(touchLocation)))
+#define IS_TOUCH_INSIDE_INSTANCE(target,name,touchLocation) (target && CCRect::CCRectContainsPoint(target->getMovieClipRectWithInstanceName(name), target->getParent()->convertToNodeSpace(touchLocation)))
+
+//added by YoungJae Kwon
 #ifndef CCAssert
+#ifdef COCOS2D_DEBUG
+    #define CCAssert(cond, msg) {if(!(cond))CCLog("CCAssert:%s",msg);CC_ASSERT(cond);} 
+#else
 #define CCAssert(cond, msg)         CC_ASSERT(cond)
+#endif
 #endif  // CCAssert
 
 #include "ccConfig.h"
@@ -131,6 +140,8 @@ On iPhone it returns 2 if RetinaDisplay is On. Otherwise it returns 1
 */
 #define CC_CONTENT_SCALE_FACTOR() CCDirector::sharedDirector()->getContentScaleFactor()
 
+// CustomRetina:
+#define CC_IS_CUSTOM_RETINA() CCDirector::sharedDirector()->isCustomRetinaEnabled()
 
 /** @def CC_RECT_PIXELS_TO_POINTS
 Converts a rect in pixels to points

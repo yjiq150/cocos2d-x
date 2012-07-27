@@ -31,6 +31,8 @@ extern "C"
 {
     extern const char* getCurrentLanguageJNI();
     extern const char* getPackageNameJNI();
+	//added by YoungJae Kwon
+	extern const char* getApplicationVersionJNI();
 }
 
 #endif // __ANDROID_SYSTEM_INFO_JNI_H__

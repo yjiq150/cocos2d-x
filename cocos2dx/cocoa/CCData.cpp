@@ -53,6 +53,10 @@ CCData* CCData::dataWithContentsOfFile(const string &strPath)
     }
 
 	CCData *pRet = new CCData();
+	
+	//Added by YoungjaeKwon
+	pRet->autorelease();
+	
     pRet->m_pData = new char[nSize];
     memcpy(pRet->m_pData, pBuffer, nSize);
 
@@ -65,10 +69,25 @@ void* CCData::bytes(void)
 }
 
 //@todo implement
+//Added by Youngjae Kwon
 CCData* CCData::dataWithBytes(unsigned char *pBytes, int size)
 {
-    CC_UNUSED_PARAM(pBytes);
-    CC_UNUSED_PARAM(size);
-	return NULL;
+	CCData *pRet = new CCData();
+	pRet->autorelease();
+	pRet->m_pData = new char[size];
+	memcpy(pRet->m_pData, pBytes, size);
+	
+	return pRet;
+}
+//Added by Youngjae Kwon
+// pBytes는 malloc이나 new를 통해 힙상에 잡혀있는 메모리여야 함
+// memcpy 없이 포인터만 저장
+CCData* CCData::dataWithBytesNoCopy(char *pBytes, int size)
+{
+	CCData *pRet = new CCData();
+	pRet->autorelease();
+	pRet->m_pData = pBytes;
+	pRet->length = size;
+return pRet;
 }
 }//namespace   cocos2d 

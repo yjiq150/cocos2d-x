@@ -158,6 +158,12 @@ CCSet* CCTargetedTouchHandler::getClaimedTouches(void)
 	return m_pClaimedTouches;
 }
 
+//added by YoungJae Kwon
+CCSet* CCTargetedTouchHandler::getClaimedMultiTouches(void)
+{
+	return m_pClaimedMultiTouches;
+}
+	
 CCTargetedTouchHandler* CCTargetedTouchHandler::handlerWithDelegate(CCTouchDelegate *pDelegate, int nPriority, bool bSwallow)
 {
 	CCTargetedTouchHandler *pHandler = new CCTargetedTouchHandler();
@@ -181,6 +187,9 @@ bool CCTargetedTouchHandler::initWithDelegate(CCTouchDelegate *pDelegate, int nP
 	if (CCTouchHandler::initWithDelegate(pDelegate, nPriority))
 	{
 		m_pClaimedTouches = new CCSet();
+
+		//added by YoungJae Kwon
+		m_pClaimedMultiTouches = new CCSet();
 		m_bSwallowsTouches = bSwallow;
 
 		return true;
@@ -192,5 +201,7 @@ bool CCTargetedTouchHandler::initWithDelegate(CCTouchDelegate *pDelegate, int nP
 CCTargetedTouchHandler::~CCTargetedTouchHandler(void)
 {
 	CC_SAFE_RELEASE(m_pClaimedTouches);
+	//added by YoungJae Kwon
+	CC_SAFE_RELEASE(m_pClaimedMultiTouches);
 }
 }//namespace   cocos2d 

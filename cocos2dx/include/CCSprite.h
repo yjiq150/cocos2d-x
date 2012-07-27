@@ -242,6 +242,9 @@ public:
 	*/
 	bool isFlipY(void);
 
+	// added by YoungJae Kwon
+	void updateOpacityBasedOnParents(void);
+	
 	void updateColor(void);
 	// RGBAProtocol
 	/** opacity: conforms to CCRGBAProtocol protocol */
@@ -333,6 +336,9 @@ public:
 	*/
 	void setDisplayFrameWithAnimationName(const char *animationName, int frameIndex);
 
+    //으악
+    virtual CCRect getRect();
+    
 protected:
 	void updateTextureCoords(const CCRect& rect);
 	void updateBlendFunc(void);

@@ -74,6 +74,7 @@
 // It seems that, in .mm it can not support category.
 @interface FontLabelStringDrawingHelper : NSObject {
 }
++ (CGSize)sizeWithZFont:(NSString*)string zfont:(ZFont *)font lineBreakMode:(UILineBreakMode)mode constrainedToSize:(CGSize)size;
 + (CGSize)sizeWithZFont:(NSString*)string zfont:(ZFont *)font;
 + (CGSize)sizeWithZFont:(NSString *)string zfont:(ZFont *)font constrainedToSize:(CGSize)size;
 + (CGSize)drawInRect:(NSString*)string rect:(CGRect)rect withZFont:(ZFont *)font 

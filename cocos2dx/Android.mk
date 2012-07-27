@@ -9,6 +9,18 @@ LOCAL_MODULE := cocos2dx_static
 LOCAL_MODULE_FILENAME := libcocos2dx
 
 LOCAL_SRC_FILES := \
+\
+plugin/CCActionTween.cpp \
+plugin/CCRawImageData.cpp \
+plugin/CCSymbol.cpp \
+plugin/CCTouchArea.cpp \
+plugin/CCThreadQueue.cpp \
+plugin/CCPropertyListWriter.cpp \
+\
+\
+\
+\
+\
 CCConfiguration.cpp \
 CCDrawingPrimitives.cpp \
 CCScheduler.cpp \
@@ -76,6 +88,9 @@ platform/android/jni/MessageJni.cpp \
 platform/android/jni/SensorJni.cpp \
 platform/android/jni/SystemInfoJni.cpp \
 platform/android/jni/TouchesJni.cpp \
+platform/android/jni/OpenURLJNI.cpp \
+\
+\
 script_support/CCScriptSupport.cpp \
 sprite_nodes/CCAnimation.cpp \
 sprite_nodes/CCAnimationCache.cpp \
@@ -107,7 +122,9 @@ tileMap_parallax_nodes/CCTMXTiledMap.cpp \
 tileMap_parallax_nodes/CCTMXXMLParser.cpp \
 tileMap_parallax_nodes/CCTileMapAtlas.cpp \
 touch_dispatcher/CCTouchDispatcher.cpp \
-touch_dispatcher/CCTouchHandler.cpp 
+touch_dispatcher/CCTouchHandler.cpp \
+\
+
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/ \
                            $(LOCAL_PATH)/include \
@@ -117,19 +134,24 @@ LOCAL_EXPORT_LDLIBS := -llog\
                        -lz \
                        -lGLESv1_CM
 
+					\
+					$(LOCAL_PATH)/../addon \
+					$(LOCAL_PATH)/../addon/VVSWFNode \
+					\
+					$(LOCAL_PATH)/plugin \
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/ \
                     $(LOCAL_PATH)/include \
                     $(LOCAL_PATH)/platform
-
 LOCAL_LDLIBS := -lGLESv1_CM \
                 -llog \
+                -lz 
                 -lz 
 
 LOCAL_WHOLE_STATIC_LIBRARIES := cocos_libpng_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos_jpeg_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos_libxml2_static
 
-# define the macro to compile through support/zip_support/ioapi.c                
+LOCAL_CFLAGS := -DUSE_FILE32API
 LOCAL_CFLAGS := -DUSE_FILE32API
 
 include $(BUILD_STATIC_LIBRARY)

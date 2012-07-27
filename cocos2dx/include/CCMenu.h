@@ -57,6 +57,7 @@ namespace cocos2d{
 		CCMenu()
 			: m_cOpacity(0)
 			, m_pSelectedItem(NULL)
+			, touchPriority(kCCMenuTouchPriority) // added by YoungJae Kwon
 		{}
 		virtual ~CCMenu(){}
 
@@ -104,14 +105,24 @@ namespace cocos2d{
 		virtual void addChild(CCNode * child, int zOrder);
 		virtual void addChild(CCNode * child, int zOrder, int tag);
 		virtual void registerWithTouchDispatcher();
-
+		void changeTouchPriority(int aPriority);
         /**
         @brief For phone event handle functions
         */
+		
+		// replace ccTouch series -> ccTargetedTouches
+		// commented by YoungJae Kwon
+//		virtual bool ccTouchBegan(CCTouch* touch, CCEvent* event);
+//		virtual void ccTouchEnded(CCTouch* touch, CCEvent* event);
+//		virtual void ccTouchCancelled(CCTouch *touch, CCEvent* event);
+//		virtual void ccTouchMoved(CCTouch* touch, CCEvent* event);
+
+		// added by YoungJae Kwon
 		virtual bool ccTouchBegan(CCTouch* touch, CCEvent* event);
-		virtual void ccTouchEnded(CCTouch* touch, CCEvent* event);
-		virtual void ccTouchCancelled(CCTouch *touch, CCEvent* event);
-		virtual void ccTouchMoved(CCTouch* touch, CCEvent* event);
+		virtual bool ccTargetedTouchesBegan(CCSet* touches, CCEvent* event);
+		virtual void ccTargetedTouchesEnded(CCSet* touches, CCEvent* event);
+		virtual void ccTargetedTouchesCancelled(CCSet *touches, CCEvent* event);
+		virtual void ccTargetedTouchesMoved(CCSet* touches, CCEvent* event);
 
         /**
         @since v0.99.5
@@ -122,10 +133,20 @@ namespace cocos2d{
 		virtual void setIsOpacityModifyRGB(bool bValue) {CC_UNUSED_PARAM(bValue);}
 	    virtual bool getIsOpacityModifyRGB(void) { return false;}
 
+        // added by YoungJae Kwon for Pocoyo RTTI code convert
+        virtual std::string getClassName()
+        {
+            std::string className("CCMenu");
+            return className;   
+        }
+        
 	protected:
 		CCMenuItem* itemForTouch(CCTouch * touch);
 		tCCMenuState m_eState;
 		CCMenuItem *m_pSelectedItem;
+		
+		// added by YoungJae Kwon
+		CC_SYNTHESIZE(int, touchPriority,TouchPriority);
 	};
 }
 

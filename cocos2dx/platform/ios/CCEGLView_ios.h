@@ -63,7 +63,16 @@ public:
     
     static CCEGLView& sharedOpenGLView();
         
+    void setFrameWidthAndHeight(int width, int height);
+    void create(int width, int height);
 private:
+    //added by YOungJAe Kwon : for force scaling
+    CCSize m_sSizeInPixel;
+	CCSize m_sSizeInPoint;
+	CCRect m_rcViewPort;
+	bool   m_bNotHVGA;
+	float  m_fScreenScaleFactor;
+    
     EGLTouchDelegate *m_pDelegate;
 };
 

@@ -124,6 +124,11 @@ public:
 	/* Shrinks the array so the memory footprint corresponds with the number of items */
     void reduceMemoryFootprint();
 
+    virtual std::string getClassName()
+    { 
+        std::string className("CCArray");
+        return className;   
+    }
 public:
     ccArray* data;
 

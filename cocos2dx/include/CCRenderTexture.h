@@ -31,6 +31,8 @@ THE SOFTWARE.
 
 namespace cocos2d {
 
+class CCRawImageData;
+    
 typedef enum eImageFormat
 {
 	kCCImageFormatJPG       = 0,
@@ -54,7 +56,8 @@ class CC_DLL CCRenderTexture : public CCNode
     The blending function can be changed in runtime by calling:
     - [[renderTexture sprite] setBlendFunc:(ccBlendFunc){GL_ONE, GL_ONE_MINUS_SRC_ALPHA}];
     */
-	CC_PROPERTY(CCSprite*, m_pSprite, Sprite)
+	CC_PROPERTY(CCSprite*, m_pSprite, Sprite);
+    CC_PROPERTY(string,renderTextureName,RenderTextureName);
 public:
 	CCRenderTexture();
 	virtual ~CCRenderTexture();
@@ -78,9 +81,13 @@ public:
     /** end is key word of lua, use other name to export to lua. */
 	inline void endToLua(){ end();};
 
+#if CC_ENABLE_CACHE_TEXTTURE_DATA
+	/** ends grabbing for android */
+	void end(bool bIsTOCasheTexture = true);
+#else
 	/** ends grabbing*/
-	// para bIsTOCacheTexture       the parameter is only used for android to cache the texture
-	void end(bool bIsTOCacheTexture = false);
+	void end();
+#endif
 
     /** clears the texture with a color */
     void clear(float r, float g, float b, float a);
@@ -110,6 +117,16 @@ public:
 	// pare nWidth,nHeight    the size of the buffer to save
 	//                        when nWidth = 0 and nHeight = 0, the image size to save equals to buffer texture size
 	bool getUIImageFromBuffer(CCImage *pImage, int x = 0, int y = 0, int nWidth = 0, int nHeight = 0);
+
+	//Added by YoungJae Kwon
+	CCRawImageData * getRawImageFromBuffer(int format,CCRect cropFrame);
+	
+
+	//added by YoungJAe Kwon
+	// for android VolatileTexture
+	void reloadAfterWakeup();
+	bool saveBufferUpsideDown(const char *szFilePath, int x, int y, int nWidth, int nHeight);
+	bool getUIImageFromBufferUpsideDown(CCImage *pImage, int x = 0, int y = 0, int nWidth = 0, int nHeight = 0);
 
 protected:
 	GLuint				m_uFBO;

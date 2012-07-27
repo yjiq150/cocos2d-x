@@ -836,6 +836,82 @@ CCActionInterval* CCRotateBy::reverse(void)
 	return CCRotateBy::actionWithDuration(m_fDuration, -m_fAngle);
 }
 
+
+//
+	// CCRotateFromTo
+	// Added by Jaeyun, Oh
+	//
+	
+	CCRotateFromTo* CCRotateFromTo::actionWithDuration(ccTime duration,float angle,float angle2)
+	{
+		CCRotateFromTo* p_moveFromTo = new CCRotateFromTo();
+		if(!p_moveFromTo->initWithDuration(duration, angle, angle2))
+			p_moveFromTo = NULL;
+		p_moveFromTo->autorelease();
+		return p_moveFromTo;
+	}
+	
+	bool CCRotateFromTo::initWithDuration(ccTime duration,float angle,float angle2)
+	{
+		if (CCActionInterval::initWithDuration(duration))
+		{
+			startAngle = angle;
+			dstAngle = angle2;
+			
+			if(startAngle > 0)
+				startAngle = fmodf(startAngle, 360.0f);
+			else
+				startAngle = fmodf(startAngle, -360.0f);
+			
+			return true;
+		}
+		return false;
+	}
+	
+	CCObject* CCRotateFromTo::copyWithZone(cocos2d::CCZone *pZone)
+	{
+		CCZone* pNewZone = NULL;
+		CCRotateFromTo* pCopy = NULL;
+		if(pZone && pZone->m_pCopyObject) 
+		{
+			//in case of being called at sub class
+			pCopy = (CCRotateFromTo*)(pZone->m_pCopyObject);
+		}
+		else
+		{
+			pCopy = new CCRotateFromTo();
+			pZone = pNewZone = new CCZone(pCopy);
+		}
+		
+		CCActionInterval::copyWithZone(pZone);
+		
+		pCopy->initWithDuration(m_fDuration, startAngle, dstAngle);
+		
+		CC_SAFE_DELETE(pNewZone);
+		return pCopy;
+	}
+	
+	void CCRotateFromTo::startWithTarget(CCNode* aTarget)
+	{
+		CCActionInterval::startWithTarget(aTarget);
+		diffAngle = dstAngle - startAngle;
+		if(diffAngle > 180)
+			diffAngle -= 360.0f;
+		if(diffAngle < -180)
+			diffAngle += 360.0f;
+	}
+	
+	void CCRotateFromTo::update(ccTime t)
+	{
+		m_pTarget->setRotation(startAngle+diffAngle*t);
+	}
+	
+	CCActionInterval* CCRotateFromTo::reverse()
+	{
+		return CCRotateFromTo::actionWithDuration(m_fDuration, dstAngle, startAngle);
+	}
+	
+	
 //
 // MoveTo
 //
@@ -897,7 +973,127 @@ void CCMoveTo::update(ccTime time)
 			m_startPosition.y + m_delta.y * time));
 	}
 }
+	//
+	// CCMoveToX
+	// Added By Jaeyun, Oh
+	//
 
+	CCMoveToX* CCMoveToX::actionWithDuration(ccTime duration,CGFloat x)
+	{
+		CCMoveToX* p_moveToX = new CCMoveToX();
+		if(!p_moveToX->initWithDuration(duration, x))
+			p_moveToX = NULL;
+		p_moveToX->autorelease();
+		return p_moveToX;
+	}
+	
+	bool CCMoveToX::initWithDuration(ccTime duration,CGFloat x)
+	{
+		if(CCActionInterval::initWithDuration(duration))
+		{
+			m_endX = x;
+			return true;
+		}
+		return false;
+	}
+	
+	CCObject* CCMoveToX::copyWithZone(cocos2d::CCZone* pZone)
+	{
+		CCZone* pNewZone = NULL;
+		CCMoveToX* pCopy = NULL;
+		if(pZone && pZone->m_pCopyObject)
+		{
+			pCopy = (CCMoveToX*)(pZone->m_pCopyObject);
+		}
+		else
+		{
+			pCopy = new CCMoveToX();
+			pZone = pNewZone = new CCZone(pCopy);
+		}
+		
+		CCActionInterval::copyWithZone(pZone);
+		
+		pCopy->initWithDuration(m_fDuration, m_endX);
+		
+		CC_SAFE_DELETE(pNewZone);
+		return pCopy;
+	}
+	
+	void CCMoveToX::startWithTarget(CCNode* pTarget)
+	{
+		CCActionInterval::startWithTarget(pTarget);
+		m_startX = pTarget->getPosition().x;
+		m_deltaX = m_endX - m_startX;
+	}
+	
+	void CCMoveToX::update(cocos2d::ccTime time)
+	{
+		if(m_pTarget)
+		{
+			m_pTarget->setPosition(ccp(m_startX + m_deltaX * time,m_pTarget->getPosition().y));
+		}
+	}
+	
+//
+	// CCMoveToY
+	// Added By Jaeyun, Oh
+	//
+	
+	CCMoveToY* CCMoveToY::actionWithDuration(ccTime duration,CGFloat y)
+	{
+		CCMoveToY* p_moveToX = new CCMoveToY();
+		if(!p_moveToX->initWithDuration(duration, y))
+			p_moveToX = NULL;
+		p_moveToX->autorelease();
+		return p_moveToX;
+	}
+	
+	bool CCMoveToY::initWithDuration(ccTime duration,CGFloat y)
+	{
+		if(CCActionInterval::initWithDuration(duration))
+		{
+			m_endY = y;
+			return true;
+		}
+		return false;
+	}
+	
+	CCObject* CCMoveToY::copyWithZone(cocos2d::CCZone* pZone)
+	{
+		CCZone* pNewZone = NULL;
+		CCMoveToY* pCopy = NULL;
+		if(pZone && pZone->m_pCopyObject)
+		{
+			pCopy = (CCMoveToY*)(pZone->m_pCopyObject);
+		}
+		else
+		{
+			pCopy = new CCMoveToY();
+			pZone = pNewZone = new CCZone(pCopy);
+		}
+		
+		CCActionInterval::copyWithZone(pZone);
+		
+		pCopy->initWithDuration(m_fDuration, m_endY);
+		
+		CC_SAFE_DELETE(pNewZone);
+		return pCopy;
+	}
+	
+	void CCMoveToY::startWithTarget(CCNode* pTarget)
+	{
+		CCActionInterval::startWithTarget(pTarget);
+		m_startY = pTarget->getPosition().y;
+		m_deltaY = m_endY - m_startY;
+	}
+	
+	void CCMoveToY::update(cocos2d::ccTime time)
+	{
+		if(m_pTarget)
+		{
+			m_pTarget->setPosition(ccp(m_pTarget->getPosition().x,m_startY + m_deltaY * time));
+		}
+	}
 //
 // MoveBy
 //
@@ -955,6 +1151,71 @@ CCActionInterval* CCMoveBy::reverse(void)
 {
 	return CCMoveBy::actionWithDuration(m_fDuration, ccp(-m_delta.x, -m_delta.y));
 }
+
+//
+// CCMoveFromTo
+// Added By Jaeyun, Oh
+//
+
+CCMoveFromTo* CCMoveFromTo::actionWithDuration(ccTime duration,CCPoint cur_p,CCPoint position)
+{
+	CCMoveFromTo* p_moveFromTo = new CCMoveFromTo();
+	if(!p_moveFromTo->initWithDuration(duration, cur_p, position))
+		p_moveFromTo = NULL;
+	p_moveFromTo->autorelease();
+	return p_moveFromTo;
+}
+
+bool CCMoveFromTo::initWithDuration(ccTime duration,CCPoint cur_p,CCPoint position)
+{
+	if (CCActionInterval::initWithDuration(duration))
+	{
+		endPosition = position;
+		startPosition = cur_p;
+		return true;
+	}
+	return false;
+}
+
+CCObject* CCMoveFromTo::copyWithZone(cocos2d::CCZone *pZone)
+{
+	CCZone* pNewZone = NULL;
+	CCMoveFromTo* pCopy = NULL;
+	if(pZone && pZone->m_pCopyObject) 
+	{
+		//in case of being called at sub class
+		pCopy = (CCMoveFromTo*)(pZone->m_pCopyObject);
+	}
+	else
+	{
+		pCopy = new CCMoveFromTo();
+		pZone = pNewZone = new CCZone(pCopy);
+	}
+	
+	CCActionInterval::copyWithZone(pZone);
+	
+	pCopy->initWithDuration(m_fDuration, startPosition, endPosition);
+	
+	CC_SAFE_DELETE(pNewZone);
+	return pCopy;
+}
+
+void CCMoveFromTo::startWithTarget(CCNode* aTarget)
+{
+	CCActionInterval::startWithTarget(aTarget);
+	delta = ccpSub(endPosition, startPosition);
+}
+
+void CCMoveFromTo::update(ccTime t)
+{
+	m_pTarget->setPosition(ccp((startPosition.x + delta.x * t),(startPosition.y + delta.y * t)));
+}
+
+CCActionInterval* CCMoveFromTo::reverse()
+{
+	return CCMoveFromTo::actionWithDuration(m_fDuration, endPosition, startPosition);
+}
+
 
 //
 // CCSkewTo

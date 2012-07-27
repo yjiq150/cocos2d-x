@@ -47,6 +47,18 @@ namespace cocos2d
 		/** create the action */
 		static CCPageTurn3D* actionWithSize(const ccGridSize& gridSize, ccTime time);
 	};
+	
+	//
+	// CCPageTurn3DReverse
+	// Added by Jaeyun, Oh
+	//
+	class CC_DLL CCPageTurn3DReverse : public CCGrid3DAction
+	{
+	public:
+		virtual void update(ccTime time);
+	public:
+		static CCPageTurn3DReverse* actionWithSize(ccGridSize gridSize,ccTime time);
+	};
 }
 
 #endif // __ACTION_CCPAGETURN3D_ACTION_H__

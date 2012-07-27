@@ -282,6 +282,27 @@ protected:
 	float m_fStartAngle;
 };
 
+	//
+	// CCRotateFromTo
+	// Added By Jaeyun, Oh
+	//
+	
+	class CC_DLL CCRotateFromTo : public CCActionInterval
+	{
+	protected:
+		float dstAngle;
+		float startAngle;
+		float diffAngle;
+	public:
+		virtual CCObject* copyWithZone(CCZone* pZone);
+		virtual void startWithTarget(CCNode *pTarget);
+		virtual void update(ccTime t);
+		virtual CCActionInterval* reverse(void);
+	public:
+		static CCRotateFromTo* actionWithDuration(ccTime duration,float angle,float angle2);
+		bool initWithDuration(ccTime duration,float angle,float angle2);
+	};
+	
 /** @brief Moves a CCNode object to the position x,y. x and y are absolute coordinates by modifying it's position attribute.
 */
 class CC_DLL CCMoveTo : public CCActionInterval
@@ -304,6 +325,54 @@ protected:
 	CCPoint m_delta;
 };
 
+	//
+	// CCMoveToX
+	// Added By Jaeyun, Oh
+	//
+	
+	class CC_DLL CCMoveToX : public CCActionInterval
+	{
+	public:
+		/** initializes the action */
+		bool initWithDuration(ccTime duration, CGFloat x);
+		
+		virtual CCObject* copyWithZone(CCZone* pZone);
+		virtual void startWithTarget(CCNode *pTarget);
+		virtual void update(ccTime time);
+		
+	public:
+		/** creates the action */
+		static CCMoveToX* actionWithDuration(ccTime duration, CGFloat x);
+		
+	protected:
+		CGFloat m_endX;
+		CGFloat m_startX;
+		CGFloat m_deltaX;
+	};
+	
+	//
+	// CCMoveToY
+	// Added By Jaeyun, Oh
+	//
+	
+	class CC_DLL CCMoveToY : public CCActionInterval
+	{
+	public:
+		bool initWithDuration(ccTime duration, CGFloat y);
+		
+		virtual CCObject* copyWithZone(CCZone* pZone);
+		virtual void startWithTarget(CCNode *pTarget);
+		virtual void update(ccTime time);
+		
+	public:
+		static CCMoveToY* actionWithDuration(ccTime duration, CGFloat y);
+		
+	protected:
+		CGFloat m_endY;
+		CGFloat m_startY;
+		CGFloat m_deltaY;
+	};
+
 /** @brief Moves a CCNode object x,y pixels by modifying it's position attribute.
  x and y are relative to the position of the object.
  Duration is is seconds.
@@ -321,6 +390,27 @@ public:
 public:
 	/** creates the action */
 	static CCMoveBy* actionWithDuration(ccTime duration, const CCPoint& position);
+};
+
+
+//	
+// CCMoveFromTo
+// Added By Jaeyun, Oh
+// 	
+class CC_DLL CCMoveFromTo : public CCActionInterval
+{
+protected:
+	CCPoint endPosition;
+	CCPoint startPosition;
+	CCPoint delta;
+public:
+	virtual CCObject* copyWithZone(CCZone* pZone);
+	virtual void startWithTarget(CCNode *pTarget);
+	virtual void update(ccTime t);
+	virtual CCActionInterval* reverse(void);
+public:
+	static CCMoveFromTo* actionWithDuration(ccTime duration,CCPoint cur_p,CCPoint position);
+	bool initWithDuration(ccTime duration,CCPoint cur_p,CCPoint position);
 };
 
 /** Skews a CCNode object to given angles by modifying it's skewX and skewY attributes

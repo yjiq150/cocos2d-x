@@ -76,6 +76,14 @@ public:
 	*/
     CCObject* anyObject();
 
+	
+
+	// added by YoungJae Kwon for targted multitouch
+	void addSubset(CCSet *pSet);	
+	void removeSubset(CCSet *pSet);
+	bool containsSubset(CCSet *pSet);
+	void removeAllObjects();
+
 private:
     std::set<CCObject *> *m_pSet;
 };

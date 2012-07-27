@@ -38,6 +38,9 @@ static FontManager *sharedFontManager = nil;
 	if ((self = [super init])) {
 		fonts = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 		urls = [[NSMutableDictionary alloc] init];
+		
+		// added by YoungJae Kwon
+		letterSpacing = -1;
 	}
 	return self;
 }
@@ -113,6 +116,16 @@ static FontManager *sharedFontManager = nil;
 	CFArrayRef array = CFArrayCreate(NULL, (const void **)values, count, &kCFTypeArrayCallBacks);
 	free(values);
 	return array;
+}
+
+// added by YoungJae Kwon
+- (int) getLetterSpacing
+{
+	return letterSpacing;
+}
+- (void) setLetterSpacing:(int) spacing
+{
+	letterSpacing = spacing;
 }
 
 - (void)dealloc {

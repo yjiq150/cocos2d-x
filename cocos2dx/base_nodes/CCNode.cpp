@@ -36,6 +36,10 @@ THE SOFTWARE.
 #include "CCActionManager.h"
 #include "CCScriptSupport.h"
 
+//added by YoungJae Kwon
+#include "CCTextureCache.h"
+#include "CCThreadQueue.h"
+
 #if CC_COCOSNODE_RENDER_SUBPIXEL
 #define RENDER_IN_SUBPIXEL
 #else
@@ -254,6 +258,14 @@ const CCPoint& CCNode::getPosition()
 void CCNode::setPosition(const CCPoint& newPosition)
 {
 	m_tPosition = newPosition;
+
+    // CustomRetina:
+    if ( CC_IS_CUSTOM_RETINA() )
+    {
+        m_tPositionInPixels = m_tPosition;
+    }
+    else 
+    {
 	if (CC_CONTENT_SCALE_FACTOR() == 1)
 	{
 		m_tPositionInPixels = m_tPosition;
@@ -262,6 +274,7 @@ void CCNode::setPosition(const CCPoint& newPosition)
 	{
 		m_tPositionInPixels = ccpMult(newPosition, CC_CONTENT_SCALE_FACTOR());
 	}
+    }
 
 	m_bIsTransformDirty = m_bIsInverseDirty = true;
 #ifdef CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
@@ -273,6 +286,13 @@ void CCNode::setPositionInPixels(const CCPoint& newPosition)
 {
     m_tPositionInPixels = newPosition;
 
+    // CustomRetina:
+    if ( CC_IS_CUSTOM_RETINA() )
+    {
+        m_tPosition = m_tPositionInPixels;
+    }
+    else 
+    {
 	if ( CC_CONTENT_SCALE_FACTOR() == 1)
 	{
 		m_tPosition = m_tPositionInPixels;
@@ -281,6 +301,7 @@ void CCNode::setPositionInPixels(const CCPoint& newPosition)
 	{
 		m_tPosition = ccpMult(newPosition, 1/CC_CONTENT_SCALE_FACTOR());
 	}
+    }
 
 	m_bIsTransformDirty = m_bIsInverseDirty = true;
 
@@ -774,6 +795,17 @@ void CCNode::reorderChild(CCNode *child, int zOrder)
 
 void CCNode::visit()
 {
+
+	
+	// added by YoungJae Kwon
+	// deprecated after pthread update by cocos2dx 2011.11.26
+	//CCTextureCache::sharedTextureCache()->executeCallbacks();
+	
+	// added by YoungJae Kwon
+	// deprecated after pthread update by cocos2dx 2011.11.26
+	// run functions added from worker thread
+	//CCThreadQueue::sharedThreadQueue()->runTasks();
+	
 	// quick return if not visible
 	if (!m_bIsVisible)
 	{
@@ -788,6 +820,10 @@ void CCNode::visit()
  	}
 
 	this->transform();
+
+	// added by YoungJaeKwon
+	// for VVScrollView Clipping
+	this->beforeDraw();
 
     CCNode* pNode = NULL;
     unsigned int i = 0;
@@ -828,6 +864,8 @@ void CCNode::visit()
 		}		
 	}
 
+	this->afterDraw();
+	
  	if (m_pGrid && m_pGrid->isActive())
  	{
  		m_pGrid->afterDraw(this);
@@ -853,7 +891,9 @@ void CCNode::transform()
 	// BEGIN alternative -- using cached transform
 	//
 	if( m_bIsTransformGLDirty ) {
-		CCAffineTransform t = this->nodeToParentTransform();
+//		CCAffineTransform t = this->nodeToParentTransform();        
+        // CustomRetina:
+		CCAffineTransform t = this->nodeToParentTransformForDraw();
 		CGAffineToGL(&t, m_pTransformGL);
 		m_bIsTransformGLDirty = false;
 	}
@@ -1066,7 +1106,9 @@ void CCNode::pauseSchedulerAndActions()
 	CCScheduler::sharedScheduler()->pauseTarget(this);
 	CCActionManager::sharedManager()->pauseTarget(this);
 }
-
+    
+// added by YoungJae Kwon
+// for custom retina scaling , original function PoisitionPix* CC_CONTENT_SCALE_FACTOR()
 CCAffineTransform CCNode::nodeToParentTransform(void)
 {
 	if (m_bIsTransformDirty) {
@@ -1077,7 +1119,66 @@ CCAffineTransform CCNode::nodeToParentTransform(void)
 		{
 			m_tTransform = CCAffineTransformTranslate(m_tTransform, m_tAnchorPointInPixels.x, m_tAnchorPointInPixels.y);
 		}
+        if(! CCPoint::CCPointEqualToPoint(m_tPositionInPixels, CCPointZero))
+        {            
+            m_tTransform = CCAffineTransformTranslate(m_tTransform, m_tPositionInPixels.x, m_tPositionInPixels.y);            
+        }
+        if(m_fRotation != 0)
+        {
+            m_tTransform = CCAffineTransformRotate(m_tTransform, -CC_DEGREES_TO_RADIANS(m_fRotation));
+        }
 
+        if(m_fSkewX != 0 || m_fSkewY != 0) 
+        {
+            // create a skewed coordinate system
+            CCAffineTransform skew = CCAffineTransformMake(1.0f, tanf(CC_DEGREES_TO_RADIANS(m_fSkewY)), tanf(CC_DEGREES_TO_RADIANS(m_fSkewX)), 1.0f, 0.0f, 0.0f);
+            // apply the skew to the transform
+            m_tTransform = CCAffineTransformConcat(skew, m_tTransform);
+        }
+        
+        if(! (m_fScaleX == 1 && m_fScaleY == 1)) 
+        {
+            m_tTransform = CCAffineTransformScale(m_tTransform, m_fScaleX, m_fScaleY);
+        }
+        
+        if(! CCPoint::CCPointEqualToPoint(m_tAnchorPointInPixels, CCPointZero))
+        {
+            m_tTransform = CCAffineTransformTranslate(m_tTransform, -m_tAnchorPointInPixels.x, -m_tAnchorPointInPixels.y);
+        }
+        
+        // CustomRetina:
+        m_tTransform2 = m_tTransform;
+        if( CC_IS_CUSTOM_RETINA() )
+        {
+            m_tTransform2.tx *= CC_CONTENT_SCALE_FACTOR();
+            m_tTransform2.ty *= CC_CONTENT_SCALE_FACTOR();        
+        }
+        
+        m_bIsTransformDirty = false;
+    }
+    
+    //return m_tTransform;
+    
+    // CustomRetina:
+	return m_tTransform2;
+}
+
+
+// CustomRetina 모드에서 함수 변형
+// nodeToParentTransformForDraw 의 경우에는 원래 cocos2dx 버전의 nodeToParentTransform 함수와 동일하게 transform을 만들어서 리턴한다.
+// 단, m_bIsTransformDirty 가 false일때 호출되어 미리 m_tTransform2를 만들어둔다.
+// 실제로 m_tTransform2의 사용시점은 customRetin버전으로 수정된 nodeToParentTransform 함수가 호출될때이다.
+// 즉, drawing은 예전 레티나 그대로하면서, 좌표계 스케일링은 customretina대로 하기 위해 함수를 두개로 쪼갠것임.
+CCAffineTransform CCNode::nodeToParentTransformForDraw(void)
+{   
+    if (m_bIsTransformDirty) {
+        
+        m_tTransform = CCAffineTransformIdentity;
+        
+        if( ! m_bIsRelativeAnchorPoint && ! CCPoint::CCPointEqualToPoint(m_tAnchorPointInPixels, CCPointZero) )
+        {
+            m_tTransform = CCAffineTransformTranslate(m_tTransform, m_tAnchorPointInPixels.x, m_tAnchorPointInPixels.y);
+        }
 		if(! CCPoint::CCPointEqualToPoint(m_tPositionInPixels, CCPointZero))
 		{
 			m_tTransform = CCAffineTransformTranslate(m_tTransform, m_tPositionInPixels.x, m_tPositionInPixels.y);
@@ -1106,6 +1207,14 @@ CCAffineTransform CCNode::nodeToParentTransform(void)
 			m_tTransform = CCAffineTransformTranslate(m_tTransform, -m_tAnchorPointInPixels.x, -m_tAnchorPointInPixels.y);
 		}
 
+        // CustomRetina:
+        m_tTransform2 = m_tTransform;
+        if( CC_IS_CUSTOM_RETINA() )
+        {
+            m_tTransform2.tx *= CC_CONTENT_SCALE_FACTOR();
+            m_tTransform2.ty *= CC_CONTENT_SCALE_FACTOR();        
+        }
+        
 		m_bIsTransformDirty = false;
 	}
 
@@ -1114,11 +1223,18 @@ CCAffineTransform CCNode::nodeToParentTransform(void)
 
 CCAffineTransform CCNode::parentToNodeTransform(void)
 {
+    //MOD: no one calls here yet, so it may cause problem
 	if ( m_bIsInverseDirty ) {
-		m_tInverse = CCAffineTransformInvert(this->nodeToParentTransform());
+        //CustomRetina:
+        m_tInverse = CCAffineTransformInvert(this->nodeToParentTransformForDraw()); // original cocos2d transform
+		m_tInverse2 = CCAffineTransformInvert(this->nodeToParentTransform());       // modified, pos pixel 2x transform
 		m_bIsInverseDirty = false;
 	}
 
+    //CustomRetina:
+    if( CC_IS_CUSTOM_RETINA() )    
+        return m_tInverse2;
+    else 
 	return m_tInverse;
 }
 
@@ -1222,4 +1338,27 @@ CCPoint CCNode::convertTouchToNodeSpaceAR(CCTouch *touch)
 	return this->convertToNodeSpaceAR(point);
 }
 
+// Added by YoungJae Kwon
+// For function compatiblity for CCSymbol, CCActionTween
+void CCNode::setOpacity(GLubyte aOpacity)
+{
+	//do nothing
+}
+
+GLubyte CCNode::getOpacity()
+{
+	return 255;
+}
+	
+// Added by YoungJae Kwon	
+CCRect CCNode::getRect()
+{
+
+    
+	return CCRectMake( m_tPosition.x - m_tContentSize.width * m_tAnchorPoint.x*m_fScaleX, 
+					  m_tPosition.y - m_tContentSize.height * m_tAnchorPoint.y*m_fScaleY,
+					  m_tContentSize.width*m_fScaleX, m_tContentSize.height*m_fScaleY);
+}
+	
+	
 }//namespace   cocos2d 

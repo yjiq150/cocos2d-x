@@ -35,6 +35,7 @@ THE SOFTWARE.
 #include "CCString.h"
 #include "CCSAXParser.h"
 #include "support/zip_support/unzip.h"
+#include "CCNumber.h"
 
 NS_CC_BEGIN;
 
@@ -55,6 +56,13 @@ typedef enum
 
 class CCDictMaker : public CCSAXDelegator
 {
+    // added by YoungJae Kwon
+protected:
+    bool isUsingCCNumber;
+public:
+    void setIsUsingCCNumber(bool val) { isUsingCCNumber = val; }
+    
+    
 public:
     CCDictionary<std::string, CCObject*> *m_pRootDict;
     CCDictionary<std::string, CCObject*> *m_pCurDict;
@@ -66,12 +74,19 @@ public:
     std::stack<CCMutableArray<CCObject*>*> m_tArrayStack;
     std::stack<CCSAXState>  m_tStateStack;
 
+    // added by YoungJae Kwon
+    CCArray *cArray;    
+    std::stack<CCArray*> cArrayStack;
+    
 public:
     CCDictMaker()
 		: m_pRootDict(NULL),
 		  m_pCurDict(NULL),
           m_tState(SAX_NONE),
-          m_pArray(NULL)
+    m_pArray(NULL),
+    cArray(NULL),
+    isUsingCCNumber(false)
+    
     {
     }
 
@@ -118,7 +133,11 @@ public:
             if (SAX_ARRAY == preState)
             {
                 // add the dictionary into the array
+                if (!isUsingCCNumber) 
                 m_pArray->addObject(m_pCurDict);
+                else
+                    cArray->addObject(m_pCurDict);
+                
             }
             else if (SAX_DICT == preState)
             {
@@ -153,23 +172,47 @@ public:
         else if (sName == "array")
         {
             m_tState = SAX_ARRAY;
+            if( !isUsingCCNumber )
             m_pArray = new CCMutableArray<CCObject*>();
+            else
+                cArray = CCArray::array();
 
             CCSAXState preState = m_tStateStack.empty() ? SAX_DICT : m_tStateStack.top();
             if (preState == SAX_DICT)
             {
+                if( !isUsingCCNumber )
                 m_pCurDict->setObject(m_pArray, m_sCurKey);
+                else
+                    m_pCurDict->setObject(cArray, m_sCurKey);
+                
             }
             else if (preState == SAX_ARRAY)
             {
+                if( !isUsingCCNumber )
+                {
                 CCAssert(! m_tArrayStack.empty(), "The state is worng!");
                 CCMutableArray<CCObject*>* pPreArray = m_tArrayStack.top();
                 pPreArray->addObject(m_pArray);
             }
+                else
+                {
+                    CCAssert(! cArrayStack.empty(), "The state is worng!");
+                    CCArray* pPreArray = cArrayStack.top();
+                    pPreArray->addObject(cArray);
+                }
+            }
+            
+            if (! isUsingCCNumber) {
             m_pArray->release();
             // record the array state
             m_tStateStack.push(m_tState);
             m_tArrayStack.push(m_pArray);
+        }
+            else {
+                // record the array state
+                m_tStateStack.push(m_tState);
+                cArrayStack.push(cArray);
+            }
         }
         else
         {
@@ -194,14 +237,27 @@ public:
         else if (sName == "array")
         {
             m_tStateStack.pop();
+            if( !isUsingCCNumber )
+            {
             m_tArrayStack.pop();
             if (! m_tArrayStack.empty())
             {
                 m_pArray = m_tArrayStack.top();
             }
         }
+            else 
+            {
+                cArrayStack.pop();
+                if (! cArrayStack.empty())
+                {
+                    cArray = cArrayStack.top();
+                }
+            }
+        }
         else if (sName == "true")
         {
+            if( !isUsingCCNumber )
+            {
             CCString *str = new CCString("1");
             if (SAX_ARRAY == curState)
             {
@@ -213,8 +269,23 @@ public:
             }
             str->release();
         }
+            else 
+            {
+                CCNumber<bool>* num = CCNumber<bool>::numberWithValue(true);
+                if (SAX_ARRAY == curState)
+                {
+                    cArray->addObject(num);
+                }
+                else if (SAX_DICT == curState)
+                {
+                    m_pCurDict->setObject(num, m_sCurKey);
+                }
+            }
+        }
         else if (sName == "false")
         {
+            if( !isUsingCCNumber )
+            {
             CCString *str = new CCString("0");
             if (SAX_ARRAY == curState)
             {
@@ -225,6 +296,19 @@ public:
                 m_pCurDict->setObject(str, m_sCurKey);
             }
             str->release();
+        }
+            else 
+            {
+                CCNumber<bool>* num = CCNumber<bool>::numberWithValue(false);
+                if (SAX_ARRAY == curState)
+                {
+                    cArray->addObject(num);
+                }
+                else if (SAX_DICT == curState)
+                {
+                    m_pCurDict->setObject(num, m_sCurKey);
+                }
+            }
         }
         m_tState = SAX_NONE;
     }
@@ -241,20 +325,57 @@ public:
         CCString *pText = new CCString();
         pText->m_sString = std::string((char*)ch,0,len);
 
+        if( !isUsingCCNumber && (m_tState == SAX_INT || m_tState == SAX_REAL) )
+        {
+            // when CCNumber is not used, consider the <integer> and <real> as string.
+            m_tState = SAX_STRING;
+        }
+        
         switch(m_tState)
         {
         case SAX_KEY:
             m_sCurKey = pText->m_sString;
             break;
         case SAX_INT:
+            {
+                CCAssert(!m_sCurKey.empty(), "not found key : <integet/real>");
+                
+                CCNumber<int>* num = CCNumber<int>::numberWithValue( atoi(pText->m_sString.c_str()) );
+                if (SAX_ARRAY == curState)
+                {
+                    cArray->addObject(num);
+                }
+                else if (SAX_DICT == curState)
+                {
+                    m_pCurDict->setObject(num, m_sCurKey);
+                }
+                break;
+            }   
         case SAX_REAL:
+            {
+                CCAssert(!m_sCurKey.empty(), "not found key : <integet/real>");
+                
+                CCNumber<float>* num = CCNumber<float>::numberWithValue( atof(pText->m_sString.c_str()) );
+                if (SAX_ARRAY == curState)
+                {
+                    cArray->addObject(num);
+                }
+                else if (SAX_DICT == curState)
+                {
+                    m_pCurDict->setObject(num, m_sCurKey);
+                }
+                break;
+            } 
         case SAX_STRING:
             {
                 CCAssert(!m_sCurKey.empty(), "not found key : <integet/real>");
 
                 if (SAX_ARRAY == curState)
                 {
+                    if( !isUsingCCNumber)
                     m_pArray->addObject(pText);
+                    else
+                        cArray->addObject(pText);
                 }
                 else if (SAX_DICT == curState)
                 {
@@ -290,6 +411,8 @@ std::string& CCFileUtils::removeSuffixFromFile(std::string& path)
     return path;
 }
 
+
+
 CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(const char *pFileName)
 {
 	CCDictionary<std::string, CCObject*> *ret = dictionaryWithContentsOfFileThreadSafe(pFileName);
@@ -297,10 +420,23 @@ CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(
 
 	return ret;
 }
+CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFile(const char *pFileName, bool isUsingCCNumber)
+{
+	CCDictionary<std::string, CCObject*> *ret = dictionaryWithContentsOfFileThreadSafe(pFileName,isUsingCCNumber);
+	ret->autorelease();
 
+	return ret;
+}
 CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFileThreadSafe(const char *pFileName)
 {
 	CCDictMaker tMaker;
+    return tMaker.dictionaryWithContentsOfFile(pFileName);
+}
+
+CCDictionary<std::string, CCObject*> *CCFileUtils::dictionaryWithContentsOfFileThreadSafe(const char *pFileName, bool isUsingCCNumber)
+{
+    CCDictMaker tMaker;
+    tMaker.setIsUsingCCNumber(isUsingCCNumber);
     return tMaker.dictionaryWithContentsOfFile(pFileName);
 }
 
@@ -381,10 +517,39 @@ bool CCFileUtils::iPhoneRetinaDisplayFileExistsAtPath(const char *filename)
 	return false;
 }
 
+// added by YoungJae Kwon
+bool CCFileUtils::isFileExistInZip(const char* pszZipFilePath, const char* pszFileName)
+{
+    unzFile pFile = NULL;
+	bool isFileExist = false;
+    do 
+    {
+        CC_BREAK_IF(!pszZipFilePath || !pszFileName);
+        CC_BREAK_IF(strlen(pszZipFilePath) == 0);
+		
+        pFile = unzOpen(pszZipFilePath);
+        CC_BREAK_IF(!pFile);
+		
+        int nRet = unzLocateFile(pFile, pszFileName, 1);
+        CC_BREAK_IF(UNZ_OK != nRet);
+		
+		// file exist if the lines are executed w/o break
+        isFileExist = true;
+		
+    } while (0);
+	
+    if (pFile)
+    {
+        unzClose(pFile);
+    }
+	
+	return isFileExist;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Notification support when getFileData from invalid file path.
 //////////////////////////////////////////////////////////////////////////
-static bool s_bPopupNotify = true;
+static bool s_bPopupNotify = false;
 
 void CCFileUtils::setIsPopupNotify(bool bNotify)
 {

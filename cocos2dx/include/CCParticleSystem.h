@@ -379,6 +379,9 @@ public:
 	virtual void postStep();
 
 	virtual void update(ccTime dt);
+	
+	// Added by YoungJae Kwon 
+	void setFadeDuration(float duration);
 private:
 	/** Private method, return the string found by key in dict.
 	@return "" if not found; return the string if found.

@@ -24,6 +24,9 @@
 #import "ZFont.h"
 #import "ZAttributedStringPrivate.h"
 
+//added by YoungJae Kwon
+#import "FontManager.h"
+
 @interface ZFont (ZFontPrivate)
 @property (nonatomic, readonly) CGFloat ratio;
 @end
@@ -744,6 +747,11 @@ static CGSize drawTextInRect(CGRect rect, NSString *text, NSArray *attributes, U
 	
 	CGContextTranslateCTM(ctx, rect.origin.x, rect.origin.y);
 	
+	//added by YoungJae Kwon
+	//font character spacing, letter spacing
+	CGContextSetCharacterSpacing (ctx, [[FontManager sharedManager] getLetterSpacing]);
+	
+	
 	CGContextSetTextDrawingMode(ctx, kCGTextFill);
 	CGSize size = drawOrSizeTextConstrainedToSize(YES, text, attributes, rect.size, numberOfLines, lineBreakMode, alignment, ignoreColor);
 	
@@ -893,6 +901,15 @@ static CGSize drawTextInRect(CGRect rect, NSString *text, NSArray *attributes, U
 @end
 
 @implementation FontLabelStringDrawingHelper
+
+//added by YoungJae Kwon
+// maxline is set to "100" arbitrarily
++ (CGSize)sizeWithZFont:(NSString*)string zfont:(ZFont *)font lineBreakMode:(UILineBreakMode)mode constrainedToSize:(CGSize)dim
+{
+	CGSize size = drawOrSizeTextConstrainedToSize(NO, string, attributeRunForFont(font), CGSizeMake(dim.width,CGFLOAT_MAX), 100,
+												  mode, UITextAlignmentLeft, YES);
+	return CGSizeMake(ceilf(size.width), ceilf(size.height));
+}
 + (CGSize)sizeWithZFont:(NSString*)string zfont:(ZFont *)font {
         CGSize size = drawOrSizeTextConstrainedToSize(NO, string, attributeRunForFont(font), CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), 1,
 												  UILineBreakModeClip, UITextAlignmentLeft, YES);

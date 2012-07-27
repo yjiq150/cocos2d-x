@@ -41,7 +41,30 @@ THE SOFTWARE.
 namespace   cocos2d {
 class CCLock;
 class CCImage;
+    class CCRenderTexture;
 
+    class CCAsyncObject : public CCObject
+    {
+    public:
+		CCAsyncObject();
+        virtual ~CCAsyncObject();
+        
+		// run the registered callback function
+        // execute should be called on main thread
+        virtual void execute();
+		
+        SEL_CallFuncO selector;
+        SelectorProtocol* target;
+		
+		CCImage* loadedImage; 
+		
+        std::string  filename;
+        const char* getTextureName();
+        void setTextureName(const char* aName);
+        
+        
+    };
+    
 /** @brief Singleton that handles the loading of textures
 * Once the texture is loaded, the next time it will return
 * a reference of the previously loaded texture reducing GPU & CPU memory
@@ -52,6 +75,9 @@ protected:
 	CCMutableDictionary<std::string, CCTexture2D*> * m_pTextures;
 	//pthread_mutex_t				*m_pDictLock;
 
+		//added by YoungJae Kwon
+		// If maxTasksInQueue == 0 , no limit for size of queue
+		CC_SYNTHESIZE(int, maxTasksInQueue, MaxTasksInQueue);
 
 private:
 	// @todo void addImageWithAsyncObject(CCAsyncObject* async);
@@ -88,6 +114,9 @@ public:
 	* @since v0.8
 	*/
 	
+	//added by YoungJae Kwon
+	// for the additional info for async loading, ex) set position, opacity... in advance for convenience
+	void addImageAsync(CCAsyncObject* async);
 	void addImageAsync(const char *path, CCObject *target, SEL_CallFuncO selector);
 
 	/* Returns a Texture2D object given an CGImageRef image
@@ -163,6 +192,15 @@ public:
     It's only useful when the value of CC_ENABLE_CACHE_TEXTTURE_DATA is 1
     */
     static void reloadAllTextures();
+	//added by YoungJae Kwon
+	void rebindRenderTextures();
+	void saveRegisteredRenderTexturesToFile();
+	void saveRegisteredRenderTexturesToVolatileTextureCache();
+	void registerRenderTexture(CCRenderTexture* renderTexture);
+	void unregisterRenderTexture(CCRenderTexture* renderTexture);
+		
+	protected:
+		 CCMutableDictionary<std::string, CCRenderTexture*> * m_pRenderTextures;
 };
 
 #if CC_ENABLE_CACHE_TEXTTURE_DATA
@@ -173,7 +211,7 @@ typedef enum {
 	kInvalid = 0,
 	kImageFile,
 	kImageData,
-	kString,
+            kString
 }ccCachedImageType;
 
 public:

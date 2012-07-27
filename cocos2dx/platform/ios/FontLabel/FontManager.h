@@ -27,6 +27,9 @@
 @interface FontManager : NSObject {
 	CFMutableDictionaryRef fonts;
 	NSMutableDictionary *urls;
+	
+	//added by YoungJae Kwon
+	int letterSpacing;
 }
 + (FontManager *)sharedManager;
 /*!
@@ -82,4 +85,8 @@
 	@description You are responsible for releasing the CFArrayRef
 */
 - (CFArrayRef)copyAllFonts;
+
+//added by YoungJae Kwon
+- (int) getLetterSpacing;
+- (void) setLetterSpacing:(int) spacing;
 @end

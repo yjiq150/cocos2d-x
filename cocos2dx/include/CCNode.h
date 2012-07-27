@@ -245,6 +245,12 @@ namespace   cocos2d {
 		// transform
 		CCAffineTransform m_tTransform, m_tInverse;
 
+        // added by YoungJae Kwon
+        // transform for  NodeConverting used in Custom Retina Scaling
+        // m_tTransform is used when draw()
+        // m_tTransform2 is used for convertToNodeSpace()
+        CCAffineTransform m_tTransform2, m_tInverse2;
+        
 #ifdef	CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
 		GLfloat	m_pTransformGL[16];
 #endif
@@ -523,7 +529,7 @@ namespace   cocos2d {
          @since v0.7.1
          */
 		CCAffineTransform nodeToParentTransform(void);
-
+        CCAffineTransform nodeToParentTransformForDraw(void);
 		/** Returns the matrix that transform parent's space coordinates to the node's (local) space coordinates.
          The matrix is in Pixels.
          @since v0.7.1
@@ -568,6 +574,13 @@ namespace   cocos2d {
          @since v0.7.1
          */
 		CCPoint convertTouchToNodeSpaceAR(CCTouch * touch);
+		
+		// Added By YoungJae kwon
+		virtual void setOpacity(GLubyte aOpacity);
+		virtual GLubyte getOpacity();
+		virtual void beforeDraw(){}
+		virtual void afterDraw(){}
+		virtual CCRect getRect();
 	};
 }//namespace   cocos2d
 

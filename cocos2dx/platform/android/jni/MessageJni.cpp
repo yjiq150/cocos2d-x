@@ -128,3 +128,31 @@ extern "C"
 		env->ReleaseStringUTFChars(apkPath, str);
 	}
 }
+
+	void disableOrientationChangeJNI()
+	{
+		JniMethodInfo t;
+
+		if (JniHelper::getStaticMethodInfo(t
+			, "org/cocos2dx/lib/Cocos2dxActivity"
+			, "disableOrientationChange"
+			, "()V"))
+		{
+			t.env->CallStaticVoidMethod(t.classID, t.methodID);
+			t.env->DeleteLocalRef(t.classID);
+		}
+	}
+	void enableOrientationChangeJNI()
+	{
+		JniMethodInfo t;
+
+		if (JniHelper::getStaticMethodInfo(t
+			, "org/cocos2dx/lib/Cocos2dxActivity"
+			, "enableOrientationChange"
+			, "()V"))
+		{
+			t.env->CallStaticVoidMethod(t.classID, t.methodID);
+			t.env->DeleteLocalRef(t.classID);
+		}
+	}
+}

@@ -46,8 +46,124 @@ extern "C"
 #define MAX_TOUCHES         5
 static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 
-    // handle touch event	
-	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y)
+// #ifndef IS_STYLUS_SUPPORT
+//     // handle touch event	
+// 	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y)
+// 	{
+// 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
+// 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
+// 		CCSet set;
+// 
+// 		CCTouch *pTouch = s_pTouches[id];
+// 		if (! pTouch)
+// 		{
+// 			LOGD("Beginning touches with id: %d, x=%f, y=%f", id, x, y);
+// 
+// 			pTouch = new CCTouch();			
+// 			pTouch->SetTouchInfo(0, (x - rcRect.origin.x) / fScreenScaleFactor, (y - rcRect.origin.y) / fScreenScaleFactor);
+// 			s_pTouches[id] = pTouch;
+// 			set.addObject(pTouch);
+// 
+// 			cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesBegan(&set, NULL);
+// 		}	
+// 		else
+// 		{
+// 			LOGD("Beginnig touches with id: %d error", id);
+// 		}
+// 	}
+// 	
+// 	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y)
+// 	{
+// 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
+// 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
+// 		CCSet set;
+// 
+// 		/* Add to the set to send to the director */
+// 		CCTouch* pTouch = s_pTouches[id];		
+// 		if (pTouch)
+// 		{
+// 			LOGD("Ending touches with id: %d, x=%f, y=%f", id, x, y);
+// 
+// 			pTouch->SetTouchInfo(0, (x - rcRect.origin.x) / fScreenScaleFactor , (y - rcRect.origin.y) / fScreenScaleFactor);
+// 		    set.addObject(pTouch);
+// 
+// 			// release the object
+// 			pTouch->release();
+// 			s_pTouches[id] = NULL;
+// 
+// 			cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesEnded(&set, NULL);
+// 		} else {
+// 			LOGD("Ending touches with id: %d error", id);
+// 		}		
+// 	}
+// 	
+// 	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys)
+// 	{
+// 		int size = env->GetArrayLength(ids);
+// 		jint id[size];
+// 		jfloat x[size];
+// 		jfloat y[size];
+// 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
+// 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
+// 		CCSet set;
+// 
+// 		env->GetIntArrayRegion(ids, 0, size, id);
+// 		env->GetFloatArrayRegion(xs, 0, size, x);
+// 		env->GetFloatArrayRegion(ys, 0, size, y);
+// 
+// 		for( int i = 0 ; i < size ; i++ ) {
+// 			LOGD("Moving touches with id: %d, x=%f, y=%f", id[i], x[i], y[i]);
+// 			cocos2d::CCTouch* pTouch = s_pTouches[id[i]];
+// 			if (pTouch)
+// 			{
+// 				pTouch->SetTouchInfo(0, (x[i] - rcRect.origin.x) / fScreenScaleFactor , 
+// 			                        (y[i] - rcRect.origin.y) / fScreenScaleFactor);
+// 				set.addObject(pTouch);
+// 			}
+// 			else
+// 			{
+// 				// It is error, should return.
+// 				LOGD("Moving touches with id: %d error", id[i]);
+// 				return;
+// 			}
+// 		}
+// 		
+// 		cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesMoved(&set, NULL);
+// 	}
+// 
+// 	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesCancel(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys)
+// 	{
+// 		int size = env->GetArrayLength(ids);
+// 		jint id[size];
+// 		jfloat x[size];
+// 		jfloat y[size];
+// 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
+// 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
+// 		CCSet set;
+// 
+// 		env->GetIntArrayRegion(ids, 0, size, id);
+// 		env->GetFloatArrayRegion(xs, 0, size, x);
+// 		env->GetFloatArrayRegion(ys, 0, size, y);
+// 
+// 		for( int i = 0 ; i < size ; i++ ) {
+// 			cocos2d::CCTouch* pTouch = s_pTouches[id[i]];
+// 			if (pTouch)
+// 			{
+// 				pTouch->SetTouchInfo(0, (x[i] - rcRect.origin.x) / fScreenScaleFactor , 
+// 			                        (y[i] - rcRect.origin.y) / fScreenScaleFactor);
+// 				set.addObject(pTouch);
+// 				s_pTouches[id[i]] = NULL;
+// 				pTouch->release();
+// 			}
+// 		}
+// 
+// 		cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesCancelled(&set, NULL);
+// 	}
+// 	
+// #else
+	// added by YoungJae Kwon 2012.03.17
+	// handling type & pressure for S-Pen
+	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesBegin(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y, jint type, jfloat pressure)
 	{
 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
@@ -56,10 +172,12 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		CCTouch *pTouch = s_pTouches[id];
 		if (! pTouch)
 		{
-			LOGD("Beginning touches with id: %d, x=%f, y=%f", id, x, y);
+			LOGD("Beginning touches with id: %d, x=%f, y=%f, type=%d, pressure=%f", id, x, y,type,pressure);
 
 			pTouch = new CCTouch();			
-			pTouch->SetTouchInfo((x - rcRect.origin.x) / fScreenScaleFactor, (y - rcRect.origin.y) / fScreenScaleFactor);
+			pTouch->SetTouchInfo(0, (x - rcRect.origin.x) / fScreenScaleFactor, (y - rcRect.origin.y) / fScreenScaleFactor);
+			pTouch->setPressure(pressure);
+			pTouch->setType((TouchType)type);
 			s_pTouches[id] = pTouch;
 			set.addObject(pTouch);
 
@@ -71,7 +189,7 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		}
 	}
 	
-	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y)
+	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesEnd(JNIEnv*  env, jobject thiz, jint id, jfloat x, jfloat y, jint type, jfloat pressure)
 	{
 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
@@ -81,9 +199,11 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		CCTouch* pTouch = s_pTouches[id];		
 		if (pTouch)
 		{
-			LOGD("Ending touches with id: %d, x=%f, y=%f", id, x, y);
+			LOGD("Ending touches with id: %d, x=%f, y=%f, type=%d, pressure=%f", id, x, y,type,pressure);
 
-			pTouch->SetTouchInfo((x - rcRect.origin.x) / fScreenScaleFactor , (y - rcRect.origin.y) / fScreenScaleFactor);
+			pTouch->SetTouchInfo(0, (x - rcRect.origin.x) / fScreenScaleFactor , (y - rcRect.origin.y) / fScreenScaleFactor);
+			pTouch->setPressure(pressure);
+			pTouch->setType((TouchType)type);
 		    set.addObject(pTouch);
 
 			// release the object
@@ -96,12 +216,14 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		}		
 	}
 	
-	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys)
+	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesMove(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys, jintArray types, jfloatArray pressures)
 	{
 		int size = env->GetArrayLength(ids);
 		jint id[size];
 		jfloat x[size];
 		jfloat y[size];
+		jint type[size];
+		jfloat pressure[size];
 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
 		CCSet set;
@@ -109,14 +231,18 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		env->GetIntArrayRegion(ids, 0, size, id);
 		env->GetFloatArrayRegion(xs, 0, size, x);
 		env->GetFloatArrayRegion(ys, 0, size, y);
+		env->GetIntArrayRegion(types, 0, size, type);
+		env->GetFloatArrayRegion(pressures, 0, size, pressure);
 
 		for( int i = 0 ; i < size ; i++ ) {
-			LOGD("Moving touches with id: %d, x=%f, y=%f", id[i], x[i], y[i]);
+			LOGD("Moving touches with id: %d, x=%f, y=%f, type=%d, pressure=%f", id[i], x[i], y[i],type[i],pressure[i]);
 			cocos2d::CCTouch* pTouch = s_pTouches[id[i]];
 			if (pTouch)
 			{
-				pTouch->SetTouchInfo((x[i] - rcRect.origin.x) / fScreenScaleFactor , 
+				pTouch->SetTouchInfo(0, (x[i] - rcRect.origin.x) / fScreenScaleFactor , 
 			                        (y[i] - rcRect.origin.y) / fScreenScaleFactor);
+				pTouch->setPressure(pressure[i]);
+				pTouch->setType((TouchType)type[i]);
 				set.addObject(pTouch);
 			}
 			else
@@ -130,12 +256,15 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesMoved(&set, NULL);
 	}
 
-	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesCancel(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys)
+	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeTouchesCancel(JNIEnv*  env, jobject thiz, jintArray ids, jfloatArray xs, jfloatArray ys, jintArray types, jfloatArray pressures)
 	{
 		int size = env->GetArrayLength(ids);
 		jint id[size];
 		jfloat x[size];
 		jfloat y[size];
+		jint type[size];
+		jfloat pressure[size];
+		
 		CCRect rcRect = CCEGLView::sharedOpenGLView().getViewPort();
 		float fScreenScaleFactor = CCEGLView::sharedOpenGLView().getScreenScaleFactor();
 		CCSet set;
@@ -143,13 +272,18 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 		env->GetIntArrayRegion(ids, 0, size, id);
 		env->GetFloatArrayRegion(xs, 0, size, x);
 		env->GetFloatArrayRegion(ys, 0, size, y);
+		env->GetIntArrayRegion(types, 0, size, type);
+		env->GetFloatArrayRegion(pressures, 0, size, pressure);
 
 		for( int i = 0 ; i < size ; i++ ) {
 			cocos2d::CCTouch* pTouch = s_pTouches[id[i]];
 			if (pTouch)
 			{
-				pTouch->SetTouchInfo((x[i] - rcRect.origin.x) / fScreenScaleFactor , 
+				pTouch->SetTouchInfo(0, (x[i] - rcRect.origin.x) / fScreenScaleFactor , 
 			                        (y[i] - rcRect.origin.y) / fScreenScaleFactor);
+				pTouch->setPressure(pressure[i]);
+				pTouch->setType((TouchType)type[i]);
+							
 				set.addObject(pTouch);
 				s_pTouches[id[i]] = NULL;
 				pTouch->release();
@@ -158,6 +292,7 @@ static CCTouch *s_pTouches[MAX_TOUCHES] = { NULL };
 
 		cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getDelegate()->touchesCancelled(&set, NULL);
 	}
+// #endif	
 
 #define KEYCODE_BACK 0x04
 #define KEYCODE_MENU 0x52

@@ -456,7 +456,12 @@ bool CCLayerColor::initWithColorWidthHeight(const ccColor4B& color, GLfloat widt
 
 bool CCLayerColor::initWithColor(const ccColor4B& color)
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	this->initWithColorWidthHeight(color, s.width, s.height);
 	return true;
 }
@@ -464,6 +469,16 @@ bool CCLayerColor::initWithColor(const ccColor4B& color)
 /// override contentSize
 void CCLayerColor::setContentSize(const CCSize& size)
 {
+    // CustomRetina:
+    if (CC_IS_CUSTOM_RETINA())
+    {
+        m_pSquareVertices[1].x = size.width;
+        m_pSquareVertices[2].y = size.height;
+        m_pSquareVertices[3].x = size.width;
+        m_pSquareVertices[3].y = size.height;
+    }
+    else 
+    {
 	m_pSquareVertices[1].x = size.width * CC_CONTENT_SCALE_FACTOR();
 	m_pSquareVertices[2].y = size.height * CC_CONTENT_SCALE_FACTOR();
 	m_pSquareVertices[3].x = size.width * CC_CONTENT_SCALE_FACTOR();
@@ -575,7 +590,7 @@ bool CCLayerGradient::initWithColor(const ccColor4B& start, const ccColor4B& end
 
     m_bCompressedInterpolation = true;
 
-    return CCLayerColor::initWithColor(ccc4f(start.r, start.g, start.b, 255));
+    return CCLayerColor::initWithColor(ccc4(start.r, start.g, start.b, 255));
 }
 
 void CCLayerGradient::updateColor()

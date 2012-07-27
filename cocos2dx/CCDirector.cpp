@@ -124,6 +124,10 @@ bool CCDirector::init(void)
 	// create autorelease pool
 	CCPoolManager::getInstance()->push();
 
+    // added by YoungJae Kwon for custom retina style scaling
+    m_fCustomScaleFactor = 2;
+    m_bIsCustomRetinaEnabled = false;
+    
 	return true;
 }
 	
@@ -286,6 +290,12 @@ void CCDirector::setOpenGLView(CC_GLVIEW *pobOpenGLView)
 		m_obWinSizeInPixels = CCSizeMake(m_obWinSizeInPoints.width * m_fContentScaleFactor, m_obWinSizeInPoints.height * m_fContentScaleFactor);
         setGLDefaultValues();
 
+		// added by YoungJaeKwon
+		// default value of deviceScreenSize = glViewSize from java surfaceView
+		// if these two value are different, call explicitly setDeviceScreenSize
+		deviceScreenSize = m_obWinSizeInPoints;
+		
+		
 		if (m_fContentScaleFactor != 1)
 		{
 			updateContentScaleFactor();
@@ -424,11 +434,24 @@ CCPoint CCDirector::convertToGL(const CCPoint& obPoint)
 		break;
 	}
 	
+    // CustomRetina:
+    if( CC_IS_CUSTOM_RETINA() )
+    {
+        ret.x *= CC_CONTENT_SCALE_FACTOR();
+        ret.y *= CC_CONTENT_SCALE_FACTOR();
+    }
+    
 	return ret;
 }
 
 CCPoint CCDirector::convertToUI(const CCPoint& obPoint)
 {
+    if( CC_IS_CUSTOM_RETINA() )
+    {
+        obPoint.x /= CC_CONTENT_SCALE_FACTOR();
+        obPoint.y /= CC_CONTENT_SCALE_FACTOR();
+    }
+    
 	CCSize winSize = m_obWinSizeInPoints;
 	float oppositeX = winSize.width - obPoint.x;
 	float oppositeY = winSize.height - obPoint.y;
@@ -488,8 +511,10 @@ CCSize CCDirector::getDisplaySizeInPixels(void)
 
 void CCDirector::reshapeProjection(const CCSize& newWindowSize)
 {
-    CC_UNUSED_PARAM(newWindowSize);
-    m_obWinSizeInPoints = m_pobOpenGLView->getSize();
+//    CC_UNUSED_PARAM(newWindowSize);
+//    m_obWinSizeInPoints = m_pobOpenGLView->getSize();
+    
+    m_obWinSizeInPoints = newWindowSize;
 	m_obWinSizeInPixels = CCSizeMake(m_obWinSizeInPoints.width * m_fContentScaleFactor,
 		                             m_obWinSizeInPoints.height * m_fContentScaleFactor);
 
@@ -766,10 +791,30 @@ bool CCDirector::setDirectorType(ccDirectorType obDirectorType)
 	return true;
 }
 
+// added by YoungJae Kwon
+bool CCDirector::isCustomRetinaEnabled()
+{
+    return m_bIsCustomRetinaEnabled;
+}
+
+// only used in unit test
+void CCDirector::resetRetinaDisplay()
+{
+    m_bIsCustomRetinaEnabled = false;
+    m_fCustomScaleFactor = 2;
+}   
+bool CCDirector::enableCustomRetinaDisplay(float factor)
+{
+    m_bIsCustomRetinaEnabled = true;
+    m_fCustomScaleFactor = factor;
+    
+    return enableRetinaDisplay(true);
+}
+    
 bool CCDirector::enableRetinaDisplay(bool enabled)
 {
 	// Already enabled?
-	if (enabled && m_fContentScaleFactor == 2)
+	if (enabled && m_fContentScaleFactor == m_fCustomScaleFactor)
 	{
 		return true;
 	}
@@ -792,7 +837,7 @@ bool CCDirector::enableRetinaDisplay(bool enabled)
 		return false;
 	}
 
-	float newScale = (float)(enabled ? 2 : 1);
+	float newScale = (float)(enabled ? m_fCustomScaleFactor : 1);
 	setContentScaleFactor(newScale);
 
     // release cached texture
@@ -807,7 +852,7 @@ bool CCDirector::enableRetinaDisplay(bool enabled)
     }
 #endif
 
-    if (m_fContentScaleFactor == 2)
+    if (m_fContentScaleFactor == m_fCustomScaleFactor)
     {
         m_bRetinaDisplay = true;
     }
@@ -912,6 +957,19 @@ void CCDirector::setDeviceOrientation(ccDeviceOrientation kDeviceOrientation)
     }
 }
 
+
+// added by YoungJae Kwon
+// screenSize used for scaling CCScene.( refer CCScene::init() )
+void CCDirector::setDeviceScreenSize(int w, int h)
+{
+	deviceScreenSize.width = w;
+	deviceScreenSize.height = h;
+}
+
+CCSize CCDirector::getDeviceScreenSize()
+{
+	return deviceScreenSize;
+}
 
 /***************************************************
 * implementation of DisplayLinkDirector

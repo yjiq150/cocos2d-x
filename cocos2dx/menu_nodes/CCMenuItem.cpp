@@ -125,10 +125,20 @@ namespace cocos2d{
     
     CCRect CCMenuItem::rect()
     {
+        // CustomRetina:
+        if( CC_IS_CUSTOM_RETINA() )
+        {
         return CCRectMake( m_tPosition.x - m_tContentSize.width * m_tAnchorPoint.x, 
                           m_tPosition.y - m_tContentSize.height * m_tAnchorPoint.y,
+                            m_tContentSize.width*CC_CONTENT_SCALE_FACTOR(), m_tContentSize.height*CC_CONTENT_SCALE_FACTOR());
+        }
+        else 
+        {
+            return CCRectMake( m_tPosition.x - m_tContentSize.width * m_tAnchorPoint.x, 
+                              m_tPosition.y - m_tContentSize.height * m_tAnchorPoint.y,
                           m_tContentSize.width, m_tContentSize.height);
     }
+	}
     
     bool CCMenuItem::getIsSelected()
     {
@@ -544,6 +554,23 @@ namespace cocos2d{
     {
         CCMenuItem::unselected();
         
+		//added by YoungJae Kwon
+		if (isDisableSet)
+		{
+			m_pNormalImage->setIsVisible(false);
+			
+			if (m_pSelectedImage)
+			{
+				m_pSelectedImage->setIsVisible(false);
+			}
+			if (m_pDisabledImage)
+			{
+				m_pDisabledImage->setIsVisible(true);
+			}
+			
+		}
+		else 
+		{
         m_pNormalImage->setIsVisible(true);
         
         if (m_pSelectedImage)
@@ -589,6 +616,40 @@ namespace cocos2d{
         }
     }
     
+	//added by YoungJae Kwon
+	// display disabled image while keeping on the user interaction
+	void CCMenuItemSprite::setEnabled(bool bEnabled)
+    {
+		isDisableSet = !bEnabled;
+		
+        if (m_pSelectedImage)
+        {
+            m_pSelectedImage->setIsVisible(false);
+        }
+		
+        if (bEnabled)
+        {
+            m_pNormalImage->setIsVisible(true);
+			
+            if (m_pDisabledImage)
+            {
+                m_pDisabledImage->setIsVisible(false);
+            }
+        }
+        else
+        {
+            if (m_pDisabledImage)
+            {
+                m_pDisabledImage->setIsVisible(true);
+                m_pNormalImage->setIsVisible(false);
+            }
+            else
+            {
+                m_pNormalImage->setIsVisible(true);
+            }
+        }
+    }
+	
     CCMenuItemImage * CCMenuItemImage::itemFromNormalImage(const char *normalImage, const char *selectedImage)
     {
         return CCMenuItemImage::itemFromNormalImage(normalImage, selectedImage, NULL, NULL, NULL);
@@ -637,6 +698,97 @@ namespace cocos2d{
         return initFromNormalSprite(normalSprite, selectedSprite, disabledSprite, target, selector);
     }
     //
+	// MenuItemOneImage
+	//
+	// added by YOungJae Kwon
+
+	CCNode * CCMenuItemScaleOnTouch::getNormalImage()
+	{
+		return m_pNormalImage;
+	}
+	void CCMenuItemScaleOnTouch::setNormalImage(CCNode* var)
+	{
+        if (var)
+        {
+            addChild(var);
+            var->setAnchorPoint(ccp(0, 0));
+            var->setIsVisible(true);
+        }
+		
+        if (m_pNormalImage)
+        {
+            removeChild(m_pNormalImage, true);
+        }
+		
+        m_pNormalImage = var;
+	}
+	CCMenuItemScaleOnTouch * CCMenuItemScaleOnTouch::itemFromImage(const char *normalImage, CCObject* target, SEL_MenuHandler selector)
+	{
+		CCMenuItemScaleOnTouch *pRet = new CCMenuItemScaleOnTouch();
+		if (pRet && pRet->initFromImage(normalImage,target, selector))
+		{
+			pRet->autorelease();
+			return pRet;
+		}
+		CC_SAFE_DELETE(pRet);
+		return NULL;
+	}
+	bool CCMenuItemScaleOnTouch::initFromImage(const char *normalImage, CCObject* target, SEL_MenuHandler selector)
+	{
+		CCNode *normalSprite = CCSprite::spriteWithFile(normalImage);
+				
+		assert(normalSprite != NULL);
+		CCMenuItem::initWithTarget(target, selector); 
+        setNormalImage(normalSprite);
+		this->setContentSize(m_pNormalImage->getContentSize());
+		
+		return true;
+
+	}
+	
+	
+	void CCMenuItemScaleOnTouch::setOpacity(GLubyte opacity)
+    {
+        m_pNormalImage->convertToRGBAProtocol()->setOpacity(opacity);
+    }
+    void CCMenuItemScaleOnTouch::setColor(ccColor3B color)
+    {
+        m_pNormalImage->convertToRGBAProtocol()->setColor(color);
+    }
+    GLubyte CCMenuItemScaleOnTouch::getOpacity()
+    {
+        return m_pNormalImage->convertToRGBAProtocol()->getOpacity();
+    }
+    ccColor3B CCMenuItemScaleOnTouch::getColor()
+    {
+        return m_pNormalImage->convertToRGBAProtocol()->getColor();
+    }
+	
+    /**
+	 @since v0.99.5
+	 */
+    void CCMenuItemScaleOnTouch::selected()
+    {
+        CCMenuItem::selected();
+		
+        m_pNormalImage->setScale(scaleAtSelect);
+		
+		
+		m_pNormalImage->setPosition(ccp(m_pNormalImage->getPosition().x-m_pNormalImage->getContentSize().width/2 * (scaleAtSelect - 1),
+										m_pNormalImage->getPosition().y-m_pNormalImage->getContentSize().height/2 * (scaleAtSelect - 1) ));
+    }
+	
+    void CCMenuItemScaleOnTouch::unselected()
+    {
+        CCMenuItem::unselected();
+		
+		m_pNormalImage->setScale(1);
+		m_pNormalImage->setPosition(ccp(m_pNormalImage->getPosition().x+m_pNormalImage->getContentSize().width/2 * (scaleAtSelect - 1),
+										m_pNormalImage->getPosition().y+m_pNormalImage->getContentSize().height/2 * (scaleAtSelect - 1) ));
+    }
+
+
+	//
     // MenuItemToggle
     //
     void CCMenuItemToggle::setSubItems(CCMutableArray<CCMenuItem*>* var)
@@ -711,11 +863,20 @@ namespace cocos2d{
             this->removeChildByTag(kCurrentItem, false);
             CCMenuItem *item = m_pSubItems->getObjectAtIndex(m_uSelectedIndex);
             this->addChild(item, 0, kCurrentItem);
-            const CCSize& s = item->getContentSize();
+            //CustomRetina:
+            if (CC_IS_CUSTOM_RETINA())
+            {
+                CCSize s = item->getContentSizeInPixels();
+                this->setContentSizeInPixels(s);
+                item->setPosition( ccp( s.width/2, s.height/2 ) );
+            }
+            else {
+                CCSize s = item->getContentSize();
             this->setContentSize(s);
             item->setPosition( ccp( s.width/2, s.height/2 ) );
         }
     }
+	}
     unsigned int CCMenuItemToggle::getSelectedIndex()
     {
         return m_uSelectedIndex;

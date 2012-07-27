@@ -30,11 +30,21 @@ THE SOFTWARE.
 
 namespace cocos2d {
 
+// added by YoungJae Kwon
+// TouchType added: following android namings 
+typedef	enum {
+	TOOL_TYPE_UNKNOWN = 0,
+	TOOL_TYPE_FINGER = 1,
+	TOOL_TYPE_STYLUS = 2,
+	TOOL_TYPE_MOUSE = 3,
+	TOOL_TYPE_ERASER = 4		
+} TouchType;
+
 class CCTouch : public CCObject
 {
 public:
     CCTouch() {}
-    CCTouch(float x, float y) :  m_point(x, y), m_prevPoint(x, y) {}
+    CCTouch(float x, float y) :  m_point(x, y), m_prevPoint(x, y),m_type(TOOL_TYPE_FINGER) {}
 
     CCPoint locationInView() { return m_point; }
     CCPoint previousLocationInView() { return m_prevPoint; }
@@ -46,9 +56,18 @@ public:
         m_point.y   = y;
     }
 
+	CC_SYNTHESIZE(TouchType, m_type, Type);
+	CC_SYNTHESIZE(float, m_pressure,Pressure);
+	
 private:
     CCPoint m_point;
     CCPoint	m_prevPoint;
+};
+
+class CCHover : public CCObject
+{
+	// implement later
+	// onHoverListener
 };
 
 class CCEvent : public CCObject

@@ -160,11 +160,23 @@ namespace cocos2d{
 	//Menu - Events
 	void CCMenu::registerWithTouchDispatcher()
 	{
-		CCTouchDispatcher::sharedDispatcher()->addTargetedDelegate(this, kCCMenuTouchPriority, true);
+		// added By YoungJae Kwon
+		CCTouchDispatcher::sharedDispatcher()->addTargetedDelegate(this, touchPriority, true);
+		
+		// original code
+		//CCTouchDispatcher::sharedDispatcher()->addTargetedDelegate(this, kCCMenuTouchPriority, true);
 	}
 
+	// dummy function to evade from CCAssert in CCLayer
 	bool CCMenu::ccTouchBegan(CCTouch* touch, CCEvent* event)
 	{
+		return false;
+	}
+	
+	bool CCMenu::ccTargetedTouchesBegan(CCSet* touches, CCEvent* event)
+	{
+		CCTouch* touch = (CCTouch*) touches->anyObject();
+		
         CC_UNUSED_PARAM(event);
 		if (m_eState != kCCMenuStateWaiting || ! m_bIsVisible)
 		{
@@ -189,9 +201,9 @@ namespace cocos2d{
 		return false;
 	}
 
-	void CCMenu::ccTouchEnded(CCTouch *touch, CCEvent* event)
+	void CCMenu::ccTargetedTouchesEnded(CCSet *touches, CCEvent* event)
 	{
-        CC_UNUSED_PARAM(touch);
+        CC_UNUSED_PARAM(touches);
         CC_UNUSED_PARAM(event);
 		CCAssert(m_eState == kCCMenuStateTrackingTouch, "[Menu ccTouchEnded] -- invalid state");
 		if (m_pSelectedItem)
@@ -202,9 +214,9 @@ namespace cocos2d{
 		m_eState = kCCMenuStateWaiting;
 	}
 
-	void CCMenu::ccTouchCancelled(CCTouch *touch, CCEvent* event)
+	void CCMenu::ccTargetedTouchesCancelled(CCSet *touches, CCEvent* event)
 	{
-        CC_UNUSED_PARAM(touch);
+        CC_UNUSED_PARAM(touches);
         CC_UNUSED_PARAM(event);
 		CCAssert(m_eState == kCCMenuStateTrackingTouch, "[Menu ccTouchCancelled] -- invalid state");
 		if (m_pSelectedItem)
@@ -214,8 +226,10 @@ namespace cocos2d{
 		m_eState = kCCMenuStateWaiting;
 	}
 
-	void CCMenu::ccTouchMoved(CCTouch* touch, CCEvent* event)
+	void CCMenu::ccTargetedTouchesMoved(CCSet* touches, CCEvent* event)
 	{
+		CCTouch* touch = (CCTouch*) touches->anyObject();
+		
         CC_UNUSED_PARAM(event);
 		CCAssert(m_eState == kCCMenuStateTrackingTouch, "[Menu ccTouchMoved] -- invalid state");
 		CCMenuItem *currentItem = this->itemForTouch(touch);
@@ -250,6 +264,10 @@ namespace cocos2d{
                 CCNode* pChild = dynamic_cast<CCNode*>(pObject);
                 if (pChild)
                 {
+                    // CustomRetina:
+                    if( CC_IS_CUSTOM_RETINA() )
+                        height += pChild->getContentSize().height * pChild->getScaleY()*CC_CONTENT_SCALE_FACTOR() + padding;
+                    else 
                     height += pChild->getContentSize().height * pChild->getScaleY() + padding;
                 }
             }
@@ -264,11 +282,20 @@ namespace cocos2d{
                 CCNode* pChild = dynamic_cast<CCNode*>(pObject);
                 if (pChild)
                 {
+                    // CustomRetina:
+                    if( CC_IS_CUSTOM_RETINA() )
+                    {
+                        pChild->setPosition(ccp(0, y - pChild->getContentSize().height * pChild->getScaleY()*CC_CONTENT_SCALE_FACTOR() / 2.0f));
+                        y -= pChild->getContentSize().height * pChild->getScaleY()*CC_CONTENT_SCALE_FACTOR() + padding;
+                    }
+                    else
+                    {
                     pChild->setPosition(ccp(0, y - pChild->getContentSize().height * pChild->getScaleY() / 2.0f));
                     y -= pChild->getContentSize().height * pChild->getScaleY() + padding;
                 }
             }
 		}
+	}
 	}
 
 	void CCMenu::alignItemsHorizontally(void)
@@ -288,6 +315,10 @@ namespace cocos2d{
                 CCNode* pChild = dynamic_cast<CCNode*>(pObject);
                 if (pChild)
                 {
+                    // CustomRetina:
+                    if( CC_IS_CUSTOM_RETINA() )
+                        width += pChild->getContentSize().width * pChild->getScaleX()* CC_CONTENT_SCALE_FACTOR() + padding;
+                    else 
                     width += pChild->getContentSize().width * pChild->getScaleX() + padding;
                 }
             }
@@ -302,11 +333,20 @@ namespace cocos2d{
                 CCNode* pChild = dynamic_cast<CCNode*>(pObject);
                 if (pChild)
                 {
+                    // CustomRetina:
+                    if( CC_IS_CUSTOM_RETINA() )
+                    {
+                        pChild->setPosition(ccp(x + pChild->getContentSize().width * pChild->getScaleX()* CC_CONTENT_SCALE_FACTOR() / 2.0f, 0));
+                        x += pChild->getContentSize().width * pChild->getScaleX()* CC_CONTENT_SCALE_FACTOR() + padding;
+                    }
+                    else 
+                    {
                     pChild->setPosition(ccp(x + pChild->getContentSize().width * pChild->getScaleX() / 2.0f, 0));
      				x += pChild->getContentSize().width * pChild->getScaleX() + padding;
                 }
             }
 		}
+	}
 	}
 
 	void CCMenu::alignItemsInColumns(unsigned int columns, ...)

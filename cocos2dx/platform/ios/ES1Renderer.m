@@ -161,12 +161,31 @@
 			glRenderbufferStorageOES(GL_RENDERBUFFER_OES, depthFormat_, backingWidth_, backingHeight_);
 		glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBuffer_);
 		
+        // added by YoungJae Kwon
+        // adding Depth + Stencil packed buffer
+        if( depthFormat_ == GL_DEPTH24_STENCIL8_OES )
+            glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBuffer_);
+
 		// bind color buffer
 		glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer_);
 	}
 	
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer_);
 	
+    // added by YoungJae Kwon
+    //create an interleaved depth and stencil buffer, since the individual buffers are no longer 
+    //supported from 4.0 and on.
+    
+//  Create a independent stencil buffer: not supported in iOS Devices
+//    glGenRenderbuffersOES(1, &stencilBuffer_);
+//    glBindRenderbufferOES(GL_RENDERBUFFER_OES, stencilBuffer_);
+//    glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_STENCIL_INDEX8_OES, backingWidth_, backingHeight_);
+//    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES,
+//                                 GL_RENDERBUFFER_OES, stencilBuffer_);
+    
+
+    
+    
 	if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES)
 	{
 		NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));

@@ -26,20 +26,24 @@ namespace   cocos2d {
 
 CCLock::CCLock(void)
 {
+//	myLock = new boost::mutex; 
 }
 
 CCLock::~CCLock(void)
 {
-
+//	delete myLock;
 }
 
 void CCLock::lock(void)
 {
-	
+	//writeLock.lock();
+//	myLock->lock();
 }
 
 void CCLock::unlock(void)
 {
+	//writeLock.unlock();
+//	myLock->unlock();
 	
 }
 }//namespace   cocos2d 

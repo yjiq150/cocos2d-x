@@ -215,6 +215,7 @@ namespace cocos2d{
         :m_pNormalImage(NULL)
         ,m_pSelectedImage(NULL)
         ,m_pDisabledImage(NULL)
+			,isDisableSet(false) // added by YoungJae Kwon
         {}
         /** creates a menu item with a normal, selected and disabled image*/
         static CCMenuItemSprite * itemFromNormalSprite(CCNode* normalSprite, CCNode* selectedSprite, CCNode* disabledSprite = NULL);
@@ -239,9 +240,13 @@ namespace cocos2d{
         
         virtual void setIsOpacityModifyRGB(bool bValue) {CC_UNUSED_PARAM(bValue);}
         virtual bool getIsOpacityModifyRGB(void) { return false;}
+
+		// added by YoungJae Kwon
+		void setEnabled(bool bEnabled);
+		bool isDisableSet;
     };
     
-    /** @brief CCMenuItemImage accepts images as items.
+    /** @brief CCMenuItemImagecepts images as items.
      The images has 3 different states:
      - unselected image
      - selected image
@@ -263,9 +268,46 @@ namespace cocos2d{
         /** creates a menu item with a normal,selected  and disabled image with target/selector */
         static CCMenuItemImage* itemFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, CCObject* target, SEL_MenuHandler selector);
         /** initializes a menu item with a normal, selected  and disabled image with target/selector */
-        bool initFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, CCObject* target, SEL_MenuHandler selector);
+		bool initFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, SelectorProtocol* target, SEL_MenuHandler selector);
+        
+        // added by YoungJae Kwon for Pocoyo RTTI code convert
+        virtual std::string getClassName()
+        {
+            std::string className("CCMenuItemImage");
+            return className;   
+        }
     };
     
+	
+	// Added by YoungJae Kwon
+	// Enlarge normal image on Touch
+	class CC_DLL CCMenuItemScaleOnTouch : public CCMenuItem, public CCRGBAProtocol
+	{
+		/** the image used when the item is not selected */
+		CC_PROPERTY(CCNode*, m_pNormalImage, NormalImage);
+		CC_SYNTHESIZE(float, scaleAtSelect, ScaleAtSelect);
+	public:
+		CCMenuItemScaleOnTouch():m_pNormalImage(NULL),scaleAtSelect(1.1){}
+		
+		/** creates a menu item with a normal and selected image*/
+		static CCMenuItemScaleOnTouch * itemFromImage(const char* normalImage, CCObject* target, SEL_MenuHandler selector);
+		bool initFromImage(const char *normalImage, CCObject* target, SEL_MenuHandler selector);
+		
+		// super methods
+        virtual void setColor(const ccColor3B& color);
+        virtual const ccColor3B& getColor();
+        virtual void setOpacity(GLubyte opacity);
+        virtual GLubyte getOpacity();
+        /**
+		 @since v0.99.5
+		 */
+        virtual void selected();
+        virtual void unselected();
+		
+		virtual void setIsOpacityModifyRGB(bool bValue) {CC_UNUSED_PARAM(bValue);}
+        virtual bool getIsOpacityModifyRGB(void) { return false;}
+	};
+	
     /** @brief A CCMenuItemToggle
      A simple container class that "toggles" it's inner items
      The inner itmes can be any MenuItem

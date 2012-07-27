@@ -76,6 +76,25 @@ CCArray* CCArray::arrayWithArray(CCArray* otherArray)
     return pArray;
 }
 
+CCArray* CCArray::arrayWithObjects(CCObject* objects, ...)
+{
+	CCArray* pArray = CCArray::array();
+		
+	va_list ap;
+    va_start(ap, objects);
+	CCObject* obj = objects;
+	if (obj == NULL) {
+		return pArray;
+	}
+	do {
+		pArray->addObject(obj);
+	} while ((obj = va_arg(ap, CCObject*)) != NULL);
+	va_end(ap);
+	
+	return pArray;
+
+}
+
 bool CCArray::init()
 {
     return initWithCapacity(1);
@@ -146,6 +165,20 @@ bool CCArray::containsObject(CCObject* object)
 void CCArray::addObject(CCObject* object)
 {
     ccArrayAppendObjectWithResize(data, object);
+}
+
+void CCArray::addObjects(CCObject* objects, ...)
+{
+    va_list ap;
+    va_start(ap, objects);
+	CCObject* obj = objects;
+	if (obj == NULL) {
+		return;
+	}
+	do {
+		addObject(obj);
+	} while ((obj = va_arg(ap, CCObject*)) != NULL);
+	va_end(ap);
 }
 
 void CCArray::addObjectsFromArray(CCArray* otherArray)

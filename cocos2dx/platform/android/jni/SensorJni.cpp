@@ -86,4 +86,15 @@ extern "C"
 			t.env->DeleteLocalRef(t.classID);
 		}
 	}
+
+	// added by YoungJae Kwon
+	// for Android Device Orientation change
+	void Java_org_cocos2dx_lib_Cocos2dxActivity_nativeOnOrientationChange(JNIEnv*  env, jobject thiz, jboolean isPortrait)
+	{
+		CCScene*scene = cocos2d::CCDirector::sharedDirector()->getRunningScene();
+		if( scene )
+		{
+			scene->onOrientationChange((bool)isPortrait);
+}
+	}
 }

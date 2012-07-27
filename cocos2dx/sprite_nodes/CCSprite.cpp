@@ -672,6 +672,10 @@ void CCSprite::draw(void)
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
+	// added By YoungJae Kwon
+	// update node opacity based on parent's opacity
+	updateOpacityBasedOnParents();
+	
 	long offset = (long)&m_sQuad;
 
 	// vertex
@@ -943,9 +947,80 @@ bool CCSprite::isFlipY(void)
 // RGBA protocol
 //
 
+void CCSprite::updateOpacityBasedOnParents(void)
+{
+	//MOD: added by youngJae Kwon
+	GLubyte opacityForDrawing;
+	float alpha = 1.0f;
+	CCNode* parentNode = this->getParent();
+	while (parentNode != NULL) 
+	{
+		alpha *= (float)parentNode->getOpacity() / 255.0f;
+		parentNode = parentNode->getParent();
+	}
+	
+	opacityForDrawing = (GLubyte)(alpha * m_nOpacity);
+	
+	if (m_bOpacityModifyRGB)
+	{
+		m_sColor.r = m_sColorUnmodified.r * opacityForDrawing/255;
+		m_sColor.g = m_sColorUnmodified.g * opacityForDrawing/255;
+		m_sColor.b = m_sColorUnmodified.b * opacityForDrawing/255;
+	}
+	
+	ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, opacityForDrawing };
+	
+	m_sQuad.bl.colors = color4;
+	m_sQuad.br.colors = color4;
+	m_sQuad.tl.colors = color4;
+	m_sQuad.tr.colors = color4;
+	
+	// renders using Sprite Manager
+	if (m_bUsesBatchNode)
+	{
+		if (m_uAtlasIndex != CCSpriteIndexNotInitialized)
+		{
+			m_pobTextureAtlas->updateQuad(&m_sQuad, m_uAtlasIndex);
+		}
+		else
+		{
+			// no need to set it recursively
+			// update dirty_, don't update recursiveDirty_
+			m_bDirty = true;
+		}
+	}
+	
+	// self render
+	// do nothing
+}
+
 void CCSprite::updateColor(void)
 {
-	ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, m_nOpacity };
+
+	if (m_bOpacityModifyRGB)
+	{
+		m_sColor.r = m_sColorUnmodified.r * m_nOpacity/255;
+		m_sColor.g = m_sColorUnmodified.g * m_nOpacity/255;
+		m_sColor.b = m_sColorUnmodified.b * m_nOpacity/255;
+	}
+	
+	//MOD: added by youngJae Kwon
+	GLubyte opacityForDrawing;
+	float alpha = 1.0f;
+	CCNode* parentNode = this->getParent();
+	while (parentNode != NULL) 
+	{
+		alpha *= (float)parentNode->getOpacity() / 255.0f;
+		parentNode = parentNode->getParent();
+	}
+
+	// calculate opacity based on parent's opacity
+	opacityForDrawing = (GLubyte)(alpha * m_nOpacity);
+	
+
+	
+	ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, opacityForDrawing };
+	//ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, m_nOpacity };
 
 	m_sQuad.bl.colors = color4;
 	m_sQuad.br.colors = color4;
@@ -1116,6 +1191,25 @@ void CCSprite::setTexture(CCTexture2D *texture)
 	updateBlendFunc();
 }
 
+    // Added by YoungJae Kwon
+    // CustomRetina:
+    CCRect CCSprite::getRect()
+    {
+        if( CC_IS_CUSTOM_RETINA())
+        {
+            return CCRectMake( m_tPosition.x - m_tContentSize.width * m_tAnchorPoint.x*m_fScaleX*CC_CONTENT_SCALE_FACTOR(), 
+                              m_tPosition.y - m_tContentSize.height * m_tAnchorPoint.y*m_fScaleY*CC_CONTENT_SCALE_FACTOR(),
+                              m_tContentSize.width*CC_CONTENT_SCALE_FACTOR()*m_fScaleX, m_tContentSize.height*m_fScaleY*CC_CONTENT_SCALE_FACTOR());        
+        }
+        else 
+        {
+            return CCRectMake( m_tPosition.x - m_tContentSize.width * m_tAnchorPoint.x*m_fScaleX, 
+                              m_tPosition.y - m_tContentSize.height * m_tAnchorPoint.y*m_fScaleY,
+                              m_tContentSize.width*m_fScaleX, m_tContentSize.height*m_fScaleY);        
+        }
+
+    }
+    
 CCTexture2D* CCSprite::getTexture(void)
 {
 	return m_pobTexture;

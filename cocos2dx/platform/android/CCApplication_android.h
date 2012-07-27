@@ -86,6 +86,10 @@ public:
     */
     static ccLanguageType getCurrentLanguage();
 
+	//added by YoungJae Kwon
+	static const char* getApplicationVersion();
+	static const char* getCurrentLanguageCode();
+	static void openURL(const char* url);
 protected:
     static CCApplication * sm_pSharedApplication;
 };

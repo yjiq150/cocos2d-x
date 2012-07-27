@@ -25,6 +25,8 @@ THE SOFTWARE.
 #ifndef __PLATFORM_IPHONE_PLATFORM_CCLOCK_H__
 #define __PLATFORM_IPHONE_PLATFORM_CCLOCK_H__
 
+//#include <boost/thread.hpp>
+
 namespace   cocos2d {
 
 class CCLock
@@ -35,6 +37,12 @@ public:
 
 	void lock(void);
 	void unlock(void);
+	
+protected:
+//	boost::mutex *myLock;
+//	boost::unique_lock< boost::shared_mutex > writeLock;
+//	boost::shared_lock< boost::shared_mutex > readLock;
+
 };
 }//namespace   cocos2d 
 

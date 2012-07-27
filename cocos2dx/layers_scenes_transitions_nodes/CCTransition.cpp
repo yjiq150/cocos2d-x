@@ -126,13 +126,15 @@ void CCTransitionScene::finish()
 	// clean up 	
  	m_pInScene->setIsVisible(true);
  	m_pInScene->setPosition(ccp(0,0));
- 	m_pInScene->setScale(1.0f);
+// commented by YoungJae Kwon
+// 	m_pInScene->setScale(1.0f);
  	m_pInScene->setRotation(0.0f);
  	m_pInScene->getCamera()->restore();
  
  	m_pOutScene->setIsVisible(false);
  	m_pOutScene->setPosition(ccp(0,0));
- 	m_pOutScene->setScale(1.0f);
+// commented by YoungJae Kwon
+// 	m_pOutScene->setScale(1.0f);
  	m_pOutScene->setRotation(0.0f);
  	m_pOutScene->getCamera()->restore();
 
@@ -280,7 +282,12 @@ CCTransitionJumpZoom::~CCTransitionJumpZoom()
 void CCTransitionJumpZoom::onEnter()
 {
 	CCTransitionScene::onEnter();
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+    CCSize s;
+    if( CC_IS_CUSTOM_RETINA() )
+        s = CCDirector::sharedDirector()->getWinSizeInPixels();
+    else
+        s = CCDirector::sharedDirector()->getWinSize();
 
 	m_pInScene->setScale(0.5f);
 	m_pInScene->setPosition(ccp(s.width, 0));
@@ -352,7 +359,12 @@ CCActionInterval* CCTransitionMoveInL::easeActionWithAction(CCActionInterval* ac
 
 void CCTransitionMoveInL::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+    // CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(-s.width,0) );
 }
 
@@ -370,7 +382,12 @@ CCTransitionMoveInR::~CCTransitionMoveInR()
 
 void CCTransitionMoveInR::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(s.width,0) );
 }
 
@@ -388,7 +405,12 @@ CCTransitionMoveInT::~CCTransitionMoveInT()
 
 void CCTransitionMoveInT::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(0,s.height) );
 }
 
@@ -406,7 +428,12 @@ CCTransitionMoveInB::~CCTransitionMoveInB()
 
 void CCTransitionMoveInB::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(0,-s.height) );
 }
 
@@ -455,13 +482,23 @@ void CCTransitionSlideInL::sceneOrder()
 
 void CCTransitionSlideInL:: initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(-(s.width-ADJUST_FACTOR),0) );
 }
 
 CCActionInterval* CCTransitionSlideInL::action()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	return CCMoveBy::actionWithDuration(m_fDuration, ccp(s.width-ADJUST_FACTOR,0));
 }
 
@@ -491,14 +528,24 @@ void CCTransitionSlideInR::sceneOrder()
 
 void CCTransitionSlideInR::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(s.width-ADJUST_FACTOR,0) );
 }
 
 
 CCActionInterval* CCTransitionSlideInR:: action()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	return CCMoveBy::actionWithDuration(m_fDuration, ccp(-(s.width-ADJUST_FACTOR),0));
 }
 
@@ -522,14 +569,24 @@ void CCTransitionSlideInT::sceneOrder()
 
 void CCTransitionSlideInT::initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(0,s.height-ADJUST_FACTOR) );
 }
 
 
 CCActionInterval* CCTransitionSlideInT::action()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	return CCMoveBy::actionWithDuration(m_fDuration, ccp(0,-(s.height-ADJUST_FACTOR)));
 }
 
@@ -552,14 +609,24 @@ void CCTransitionSlideInB::sceneOrder()
 
 void CCTransitionSlideInB:: initScenes()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	m_pInScene->setPosition( ccp(0,-(s.height-ADJUST_FACTOR)) );
 }
 
 
 CCActionInterval* CCTransitionSlideInB:: action()
 {
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	return CCMoveBy::actionWithDuration(m_fDuration, ccp(0,s.height-ADJUST_FACTOR));
 }
 
@@ -1212,7 +1279,12 @@ void CCTransitionTurnOffTiles::sceneOrder()
 void CCTransitionTurnOffTiles::onEnter()
 {
 	CCTransitionScene::onEnter();
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	float aspect = s.width / s.height;
 	int x = (int)(12 * aspect);
 	int y = 12;
@@ -1329,7 +1401,12 @@ void CCTransitionFadeTR::onEnter()
 {
 	CCTransitionScene::onEnter();
 
-	CCSize s = CCDirector::sharedDirector()->getWinSize();
+	// CustomRetina:
+	CCSize s;
+	if( CC_IS_CUSTOM_RETINA() )
+		s = CCDirector::sharedDirector()->getWinSizeInPixels();
+	else
+		s = CCDirector::sharedDirector()->getWinSize();
 	float aspect = s.width / s.height;
 	int x = (int)(12 * aspect);
 	int y = 12;

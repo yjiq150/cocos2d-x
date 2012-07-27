@@ -53,7 +53,7 @@
     GLuint defaultFramebuffer_;
 	GLuint colorRenderbuffer_;
 	GLuint depthBuffer_;
-	
+    GLuint stencilBuffer_;
 	
 	//buffers for MSAA
 	GLuint msaaFramebuffer_;

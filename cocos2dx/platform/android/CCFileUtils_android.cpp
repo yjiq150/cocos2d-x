@@ -49,7 +49,21 @@ void CCFileUtils::setResourcePath(const char* pszResourcePath)
 
 const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath, ccResolutionType *pResolutionType)
 {
+	if (s_strResourcePath.find(".apk") != string::npos)
+	{
 	return pszRelativePath;
+}
+	else
+	{
+		// if it is absolute path
+		if( pszRelativePath[0] == '/')
+			return pszRelativePath;
+
+		CCString *pRet = new CCString();
+		pRet->autorelease();
+		pRet->m_sString = s_strResourcePath + pszRelativePath;
+		return pRet->m_sString.c_str();
+	}
 }
 
 const char* CCFileUtils::fullPathFromRelativeFile(const char *pszFilename, const char *pszRelativeFile)
@@ -129,9 +143,19 @@ string CCFileUtils::getWriteablePath()
 	string dir("/data/data/");
 	const char *tmp = getPackageNameJNI();
 
+	CCLog("myPackName:%s",tmp);
 	if (tmp)
 	{
-		dir.append(tmp).append("/");
+		//Both of them having garbage character added Bug
+		//dir.append(tmp).append("/");
+		//dir = dir + tmp + "/";
+
+		char buf[200];
+		sprintf(buf,"/data/data/%s/",tmp);
+		dir = buf;
+		CCLog("getWritablePath:%s",dir.c_str());
+		// release memory
+		//delete [] tmp;
 
 		return dir;
 	}
@@ -140,5 +164,41 @@ string CCFileUtils::getWriteablePath()
 		return "";
 	}
 }
+
+
+// added by YoungJae Kwon
+// will be deprecated. "isFileExistInResourcePath()" should be used instead
+bool CCFileUtils::isFileExistInAPK(const char* pszFileName)
+{
+	return CCFileUtils::isFileExistInResourcePath(pszFileName);
+}
+
+// added by YoungJae Kwon
+// resourcePath could be /data/app/collinsdictionaryhd.apk
+// or /data/data/net.viscuit.collinsdictionaryhd/assets/
+// this is set by "nativeSetPaths" in Cocos2dxActivity.java
+bool CCFileUtils::isFileExistInResourcePath(const char* pszFileName)
+{
+	string fullPath = pszFileName;
+	if (s_strResourcePath.find(".apk") != string::npos)
+	{
+		// read from apk
+		fullPath.insert(0, "assets/");
+		return CCFileUtils::isFileExistInZip(s_strResourcePath.c_str(), fullPath.c_str());
+	}
+	else
+	{
+		fullPath.insert(0,s_strResourcePath);
+		FILE *fp = fopen(fullPath.c_str(), "rb");
+		if( fp == NULL)
+			return false;
+		else
+		{
+			fclose(fp);
+			return true;
+		}
+	}
+}
+
 
 NS_CC_END;

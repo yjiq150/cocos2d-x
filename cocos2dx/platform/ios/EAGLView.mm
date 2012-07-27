@@ -278,9 +278,19 @@ static cocos2d::CCTouch *s_pTouches[MAX_TOUCHES];
 	// Issue #914 #924
 // 	CCDirector *director = [CCDirector sharedDirector];
 // 	[director reshapeProjection:size_];
+
+    
+    // added by YoungJae Kwon
+    float scaleFactor = cocos2d::CCDirector::sharedDirector()->getContentScaleFactor();
+    
     cocos2d::CCSize size;
-    size.width = size_.width;
-    size.height = size_.height;
+    size.width = size_.width/scaleFactor;
+    size.height = size_.height/scaleFactor;
+    
+//    cocos2d::CCSize size;
+//    size.width = size_.width;
+//    size.height = size_.height;
+    
     cocos2d::CCDirector::sharedDirector()->reshapeProjection(size);
 
 	// Avoid flicker. Issue #350
@@ -327,6 +337,9 @@ static cocos2d::CCTouch *s_pTouches[MAX_TOUCHES];
 		
 		// not MSAA
 		else if (depthFormat_ ) {
+//            GLenum attachments[] = { GL_DEPTH_ATTACHMENT_OES, GL_STENCIL_ATTACHMENT_OES};
+//			glDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 2, attachments);
+
 			GLenum attachments[] = { GL_DEPTH_ATTACHMENT_OES};
 			glDiscardFramebufferEXT(GL_FRAMEBUFFER_OES, 1, attachments);
 		}

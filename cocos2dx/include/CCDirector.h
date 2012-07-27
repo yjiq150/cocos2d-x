@@ -478,6 +478,20 @@ protected:
 #if CC_ENABLE_PROFILERS
 	ccTime m_fAccumDtForProfiler;
 #endif
+	
+	
+	// added by YoungJae Kwon
+	// 안드로이드 다중 해상도 지원
+    float m_fCustomScaleFactor;
+public:
+    bool enableCustomRetinaDisplay(float factor);
+    bool isCustomRetinaEnabled();
+    void resetRetinaDisplay();    
+	void setDeviceScreenSize(int w, int h);
+	CCSize getDeviceScreenSize();	
+protected:
+	CCSize deviceScreenSize;
+    bool m_bIsCustomRetinaEnabled;
 };
 
 /** 

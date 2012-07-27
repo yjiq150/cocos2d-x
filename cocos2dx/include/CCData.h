@@ -37,8 +37,14 @@ public:
 	~CCData(void);
 	
 	void* bytes(void);
+	//Added by Youngjae Kwon
+	CC_SYNTHESIZE_READONLY(unsigned int, length, Length);
 
 public:
+	//Added by Youngjae Kwon
+	static CCData* dataWithBytesNoCopy(char *pBytes, int size);	
+
+	
 	static CCData* dataWithBytes(unsigned char *pBytes, int size);
 	static CCData* dataWithContentsOfFile(const std::string &strPath);
 

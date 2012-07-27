@@ -527,7 +527,16 @@ bool CCParticleSystem::isFull()
 {
 	return (m_uParticleCount == m_uTotalParticles);
 }
-
+// Added by YoungJae Kwon 
+// -1을 입력하면 reset없이 파티클 효과가 지속된다
+// 이외의 값을 입력했을경우 해당 시간이 지나면 파티클이 없어진다.
+// 기존의 setDuration과는 동작이 미묘하게 다름!
+void CCParticleSystem::setFadeDuration(float duration)
+{
+	m_bIsActive = true;
+	m_fElapsed = 0;
+	m_fDuration = duration;
+}
 // ParticleSystem - MainLoop
 void CCParticleSystem::update(ccTime dt)
 {

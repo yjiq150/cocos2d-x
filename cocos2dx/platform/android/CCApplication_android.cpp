@@ -76,6 +76,23 @@ CCApplication& CCApplication::sharedApplication()
     return *sm_pSharedApplication;
 }
 
+//added by YoungJae Kwon
+const char* CCApplication::getCurrentLanguageCode()
+{
+    return getCurrentLanguageJNI();
+}
+//added by YoungJae Kwon
+void CCApplication::openURL(const char* url)
+{
+	openURLJNI(url);
+}
+//added by YoungJae Kwon
+const char* CCApplication::getApplicationVersion()
+{
+	return getApplicationVersionJNI();
+}
+
+
 ccLanguageType CCApplication::getCurrentLanguage()
 {
     const char *pLanguageName = getCurrentLanguageJNI();

@@ -214,6 +214,90 @@ private:
 
 };
 
+	
+	// Added by YoungJae Kwon
+//	class CC_DLL CCLabelWordWrap : public CCSpriteBatchNode, public CCLabelProtocol, public CCRGBAProtocol, public CCTouchDelegate
+//	{
+//		// øˆµÂ∑¶¿ª ¿ß«— width ( label √÷¥Î ∆¯ ¡¶«—∞™ )
+//	protected:
+//		bool isEditing;
+//		bool isOnResizing;
+//		float width;
+//	public:		
+//		void onLongTouch(ccTime dt);
+//		void setWidth(float aWidth);
+//		bool isTouchInside(CCTouch *touch);
+//		bool isTouchEditableRect(CCTouch *touch);
+////		void ccTouchesBegan(CCSet* touches, CCEvent* event);
+////		void ccTouchesMoved(CCSet* touches, CCEvent* event);
+////		void ccTouchesEnded(CCSet* touches, CCEvent* event);
+//		bool ccTouchBegan(CCTouch* touch, CCEvent* event);
+//		void ccTouchMoved(CCTouch* touch, CCEvent* event);
+//		void ccTouchEnded(CCTouch* touch, CCEvent* event);
+//		void ccTouchCancelled(CCTouch* touch,CCEvent*event);
+//		
+//		/** conforms to CCRGBAProtocol protocol */
+//		CC_PROPERTY(GLubyte, m_cOpacity, Opacity)
+//		/** conforms to CCRGBAProtocol protocol */
+//		CC_PROPERTY(ccColor3B, m_tColor, Color)
+//		/** conforms to CCRGBAProtocol protocol */
+//		CC_PROPERTY(bool, m_bIsOpacityModifyRGB, IsOpacityModifyRGB)
+//	protected:
+//		// string to render
+//		std::string m_sString;
+//		CCBMFontConfiguration *m_pConfiguration;
+//	public:
+//		CCLabelWordWrap()
+//		: m_pConfiguration(NULL)
+//		, m_bIsOpacityModifyRGB(false)
+//		, m_cOpacity(0)
+//		, m_sString("")
+//		, isEditing(false)
+//		{}
+//		virtual ~CCLabelWordWrap();
+//		virtual void onExit();
+//		/** Purges the cached data.
+//		 Removes from memory the cached configurations and the atlas name dictionary.
+//		 @since v0.99.3
+//		 */
+//		static void purgeCachedData();
+//		/** creates a bitmap font altas with an initial string and the FNT file */
+//		static CCLabelWordWrap * labelWithString(const char *str, const char *fntFile, float aWidth);
+//		
+//        /** creates a BMFont label with an initial string and the FNT file
+//		 @deprecated Will be removed in 1.0.1. Use "labelWithString" instead.
+//		 @since v0.99.5
+//		 */
+//        static  CCLabelWordWrap* bitmapFontAtlasWithString(const char *str, const char *fntFile, float aWidth);
+//		
+//		/** init a bitmap font altas with an initial string and the FNT file */
+//		bool initWithString(const char *str, const char *fntFile, float aWidth);
+//		/** updates the font chars based on the string to render */
+//		void createFontChars();
+//		// super method
+//		virtual void setString(const char *label);
+//		virtual const char* getString(void);
+//        virtual void setCString(const char *label);
+//		virtual void setAnchorPoint(CCPoint var);
+//		virtual CCRGBAProtocol* convertToRGBAProtocol() { return (CCRGBAProtocol*)this; }
+//		virtual CCLabelProtocol* convertToLabelProtocol() { return (CCLabelProtocol*)this; }
+//		virtual void draw();
+//
+//	private:
+//		char * atlasNameFromFntFile(const char *fntFile);
+//		int kerningAmountForFirst(unsigned short first, unsigned short second);
+//		
+//	};
+
+	
+	///////////////////////////////
+	
+	
+	
+	
+	
+	
+	
 /** Free function that parses a FNT file a place it on the cache
 */
 CC_DLL CCBMFontConfiguration * FNTConfigLoadFile( const char *file );

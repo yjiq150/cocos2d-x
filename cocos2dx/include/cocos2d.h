@@ -91,6 +91,7 @@ THE SOFTWARE.
 
 // havn't implement on wophone
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WOPHONE)
+
 #include "CCTextFieldTTF.h"
 #endif
 
@@ -124,6 +125,15 @@ THE SOFTWARE.
 //
 #include "ccTypes.h"
 #include "ccMacros.h"
+
+
+//
+// custom plugins : added by YoungJae Kwon
+//
+#include "CCActionTween.h"
+#include "CCNumber.h"
+#include "CCValue.h"
+#include "CCSymbol.h"
 
 namespace   cocos2d {
 

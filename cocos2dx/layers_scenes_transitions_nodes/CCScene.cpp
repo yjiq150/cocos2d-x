@@ -33,7 +33,10 @@ namespace   cocos2d {
 CCScene::CCScene()
 {
 	m_bIsRelativeAnchorPoint = false;
-	setAnchorPoint(ccp(0.5f, 0.5f));
+	m_tAnchorPoint = ccp(0.5f, 0.5f);
+
+    // added by YoungJae Kwon
+    isOrientationChangeEnabled = false;
 }
 
 CCScene::~CCScene()

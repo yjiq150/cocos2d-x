@@ -67,6 +67,13 @@ public:
     
     virtual void update(ccTime dt) {CC_UNUSED_PARAM(dt);};
     
+	// Added by Youngjae Kwon
+	virtual std::string getClassName()
+    { 
+        std::string className("CCObject");
+        return className;   
+    }
+
     friend class CCAutoreleasePool;
 };
 

@@ -88,4 +88,27 @@ extern "C"
 
         return 0;
     }
+
+	// added by YoungJae Kwon
+	const char* getApplicationVersionJNI()
+    {
+        JniMethodInfo t;
+
+        if (JniHelper::getStaticMethodInfo(t
+            , "org/cocos2dx/lib/Cocos2dxActivity"
+            , "getApplicationVersion"
+            , "()Ljava/lang/String;"))
+        {
+            jstring str = (jstring)t.env->CallStaticObjectMethod(t.classID, t.methodID);
+			t.env->DeleteLocalRef(t.classID);
+	        CCString *ret = new CCString(JniHelper::jstring2string(str).c_str());
+			ret->autorelease();
+
+	        LOGD("Application VersionCode: %s", ret->m_sString.c_str());
+
+			return ret->m_sString.c_str();
+}
+
+        return 0;
+    }
 }

@@ -353,6 +353,16 @@ public:
         
 		return pDestArray;
 	}
+    //added by YoungJae Kwon
+    static CCMutableArray<T>* array()
+	{
+
+        CCMutableArray<T> *pDestArray = new CCMutableArray<T>();
+		
+        pDestArray->autorelease();
+        
+		return pDestArray;
+	}
 
 private:
 	std::vector<T> m_array;

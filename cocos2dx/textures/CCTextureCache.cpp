@@ -171,6 +171,16 @@ CCTextureCache::CCTextureCache()
 	CCAssert(g_sharedTextureCache == NULL, "Attempted to allocate a second instance of a singleton.");
 	
 	m_pTextures = new CCMutableDictionary<std::string, CCTexture2D*>();
+		m_pRenderTextures = new CCMutableDictionary<std::string, CCRenderTexture*>();
+
+		// thread variable init
+		pthread_mutex_init(&s_taskQueueLock, NULL);
+		pthread_mutex_init(&s_readyQueueLock, NULL);
+		
+		CCScheduler::sharedScheduler()->scheduleSelector(schedule_selector(CCTextureCache::addImageAsyncCallBack), this, 0, false);
+		
+		maxTasksInQueue = 0;
+		
 }
 
 CCTextureCache::~CCTextureCache()
@@ -590,9 +600,76 @@ void CCTextureCache::reloadAllTextures()
 {
 #if CC_ENABLE_CACHE_TEXTTURE_DATA
     VolatileTexture::reloadAllTextures();
+		CCTextureCache::sharedTextureCache()->rebindRenderTextures();
 #endif
 }
 
+	
+	//added by YoungJae Kwon
+	// below codes are ANDROID ONLY
+	void CCTextureCache::rebindRenderTextures()
+	{
+		// rebind frame buffer used by rendertexture
+		vector<string> keys = m_pRenderTextures->allKeys();
+		vector<string>::iterator iter;
+        for (iter = keys.begin(); iter != keys.end(); iter++)
+        {
+			CCLog("RenderTexture rebind, key:%s,",(*iter).c_str());
+			m_pRenderTextures->objectForKey(*iter)->reloadAfterWakeup();            
+        }
+	}
+    // save registered texures to image file for later use( reload at wake up ) : Warning!!! currently not used.
+	void CCTextureCache::saveRegisteredRenderTexturesToFile()
+	{
+		// save rendertexture to file for reloading as volatileTexture
+		vector<string> keys = m_pRenderTextures->allKeys();
+		vector<string>::iterator iter;
+        for (iter = keys.begin(); iter != keys.end(); iter++)
+        {
+			CCRenderTexture* render = m_pRenderTextures->objectForKey(*iter);
+			string fullPath = CCFileUtils::getWriteablePath() + render->getRenderTextureName();			
+			bool rel = render->saveBufferUpsideDown(fullPath.c_str(), 0, 0, render->getContentSize().width, render->getContentSize().height);
+			CCLog("writing rendertexture on %s, rel:%d",fullPath.c_str(),rel);
+        }
+	}
+    
+    void CCTextureCache::saveRegisteredRenderTexturesToVolatileTextureCache()
+	{
+#if CC_ENABLE_CACHE_TEXTTURE_DATA
+		// save rendertexture to file for reloading as volatileTexture
+		vector<string> keys = m_pRenderTextures->allKeys();
+		vector<string>::iterator iter;
+        for (iter = keys.begin(); iter != keys.end(); iter++)
+        {
+			CCRenderTexture* render = m_pRenderTextures->objectForKey(*iter);
+            render->begin();
+            render->end(true);
+			CCLog("save rendertexture to VolatileTextureCache name:%s",render->getRenderTextureName().c_str());
+        }
+#endif
+	}
+    
+	void CCTextureCache::registerRenderTexture(CCRenderTexture* renderTexture)
+	{
+		string name = renderTexture->getRenderTextureName();
+		if (name.length() == 0) 
+			CCAssert(0,"set RenderTexture name");
+
+		// if exist, remove & set
+		m_pRenderTextures->removeObjectForKey(name);
+		m_pRenderTextures->setObject(renderTexture, name);
+	}
+	void CCTextureCache::unregisterRenderTexture(CCRenderTexture* renderTexture)
+	{
+		string name = renderTexture->getRenderTextureName();
+		if (name.length() == 0) 
+			CCAssert(0,"set RenderTexture name");
+		
+		m_pRenderTextures->removeObjectForKey(name);
+		string fullPath = CCFileUtils::getWriteablePath() + name;
+		remove(fullPath.c_str()); // remove temporary file
+	}
+		
 void CCTextureCache::dumpCachedTextureInfo()
 {
 	unsigned int count = 0;
@@ -695,6 +772,7 @@ void VolatileTexture::addDataTexture(CCTexture2D *tt, void* data, CCTexture2DPix
 	vt->m_pTextureData = data;
 	vt->m_PixelFormat = pixelFormat;
 	vt->m_TextureSize = contentSize;
+        CCLog("%p,data texture 추가됨",vt->texture);
 }
 
 void VolatileTexture::addStringTexture(CCTexture2D *tt, const char* text, const CCSize& dimensions, CCTextAlignment alignment, const char *fontName, float fontSize)
@@ -730,7 +808,14 @@ void VolatileTexture::removeTexture(CCTexture2D *t) {
     while( i != textures.end() )
     {
         VolatileTexture *vt = *i++;
-        if (vt->texture == t) {
+            if (vt->texture == t) 
+            {
+                //added by YoungJae Kwon
+                if (vt->m_eCashedImageType == kImageData) {
+                    //으악
+                    CCLog("%p,이미지데이터 삭제",vt->texture);
+                   delete [] vt->m_pTextureData;
+                }
             delete vt;
             break;
         }
@@ -785,6 +870,7 @@ void VolatileTexture::reloadAllTextures()
             break;
 		case kImageData:
 			{
+					CCLog("reload texture from data %f :%f",vt->m_TextureSize.width,vt->m_TextureSize.height);
 				unsigned int nPOTWide, nPOTHigh;
 				nPOTWide = ccNextPOT((int)vt->m_TextureSize.width);
 				nPOTHigh = ccNextPOT((int)vt->m_TextureSize.height);

@@ -48,6 +48,10 @@ public:
 	virtual ~CCScene();
 	bool init();
 	static CCScene *node(void);
+
+	//added by YoungJae Kwon
+	virtual void onOrientationChange(bool isPortrait){ return; }
+    CC_SYNTHESIZE(bool, isOrientationChangeEnabled, IsOrientationChangeEnabled);
 };
 }//namespace   cocos2d 
 

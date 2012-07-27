@@ -130,7 +130,9 @@ void CCTouchDispatcher::forceAddHandler(CCTouchHandler *pHandler, CCMutableArray
  
  		    if (h->getDelegate() == pHandler->getDelegate())
  		    {
- 			    CCAssert(0, "");
+				//MOD: modified by YoungJae Kwon
+				CCLog("TouchHandler already registred: assert required?");
+ 			    //assert(0);
  			    return;
  		    }
          }
@@ -340,6 +342,71 @@ void CCTouchDispatcher::touches(CCSet *pTouches, CCEvent *pEvent, unsigned int u
 	pMutableTouches = (bNeedsMutableSet ? pTouches->mutableCopy() : pTouches);
 
 	struct ccTouchHandlerHelperData sHelper = m_sHandlerHelperData[uIndex];
+	
+	// added by YoungJaeKwon 
+	// adding targeted multitouch feature
+	if (uTargetedHandlersCount > 0)
+	{
+		CCTargetedTouchHandler *pHandler;
+		CCMutableArray<CCTouchHandler*>::CCMutableArrayIterator arrayIter;
+		for (arrayIter = m_pTargetedHandlers->begin(); arrayIter != m_pTargetedHandlers->end(); ++arrayIter)
+		{
+
+			pHandler = (CCTargetedTouchHandler *)(*arrayIter);
+						
+			if (! pHandler)
+			{
+				break;
+			}
+			
+			bool bClaimed = false;
+			if (uIndex == CCTOUCHBEGAN)
+			{
+				bClaimed = pHandler->getDelegate()->ccTargetedTouchesBegan(pTouches, pEvent);
+				
+				if (bClaimed)
+				{
+					pHandler->getClaimedMultiTouches()->addSubset(pTouches);
+				}
+			} 
+			else if (pHandler->getClaimedMultiTouches()->containsSubset(pTouches))
+			{
+				// moved ended cancelled
+				bClaimed = true;
+				
+				switch (sHelper.m_type)
+				{
+					case CCTOUCHMOVED:
+						pHandler->getDelegate()->ccTargetedTouchesMoved(pTouches, pEvent);
+						
+						break;
+					case CCTOUCHENDED:
+						pHandler->getDelegate()->ccTargetedTouchesEnded(pTouches, pEvent);
+						pHandler->getClaimedMultiTouches()->removeSubset(pTouches);
+						break;
+					case CCTOUCHCANCELLED:
+						pHandler->getDelegate()->ccTargetedTouchesCancelled(pTouches, pEvent);
+						pHandler->getClaimedMultiTouches()->removeSubset(pTouches);
+						break;
+				}
+			}
+		
+			if (bClaimed && pHandler->isSwallowsTouches())
+			{
+				if (bNeedsMutableSet)
+				{
+					// claim touches for StandardDelgation
+					pMutableTouches->removeSubset(pTouches);
+					// claim touches for TargetedDelegation
+					pTouches->removeAllObjects();
+				}
+				
+				break;
+			}
+		}
+	}
+	 
+	
 	//
 	// process the target handlers 1st
 	//

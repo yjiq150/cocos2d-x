@@ -106,6 +106,45 @@ CCApplication& CCApplication::sharedApplication()
     return *sm_pSharedApplication;
 }
 
+//added by YoungJae Kwon
+const char* CCApplication::getCurrentLanguageCode()
+{
+    /*
+    // this return 'ko'
+    // get the current language and country config
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *languages = [defaults objectForKey:@"AppleLanguages"];
+    NSString *currentLanguage = [languages objectAtIndex:0];
+    
+    // get the current language code.(such as English is "en", Chinese is "zh" and so on)
+    NSDictionary* temp = [NSLocale componentsFromLocaleIdentifier:currentLanguage];
+    NSString * languageCode = [temp objectForKey:NSLocaleLanguageCode];
+    */
+    
+    // this return 'kr'
+    NSString * languageCode = [[NSLocale preferredLanguages] objectAtIndex:0];
+    
+    std::string langCode = [languageCode UTF8String];
+    return langCode.c_str();
+}
+//added by YoungJae Kwon
+const char* CCApplication::getApplicationVersion()
+{
+	CFStringRef appVersion = (CFStringRef)CFBundleGetValueForInfoDictionaryKey( CFBundleGetMainBundle() , kCFBundleVersionKey );
+	CFRetain(appVersion);
+	if( !appVersion )
+	{
+		appVersion = CFStringCreateCopy(kCFAllocatorDefault , CFSTR("1.0"));	
+	}
+	
+	NSString* versionText = (NSString *)appVersion;
+	
+    std::string verStr =[versionText UTF8String];
+    CFRelease(appVersion);
+	return verStr.c_str();
+}
+
+
 ccLanguageType CCApplication::getCurrentLanguage()
 {
     // get the current language and country config

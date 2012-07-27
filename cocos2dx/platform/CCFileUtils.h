@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include <string>
 #include "CCMutableDictionary.h"
 
+#include "CCPropertyListWriter.h"
+
 NS_CC_BEGIN;
 
 //! @brief  Helper class to handle file operations
@@ -150,13 +152,28 @@ public:
     @return  The CCDictionary pointer generated from the file
     */
     static CCDictionary<std::string, CCObject*> *dictionaryWithContentsOfFile(const char *pFileName);
-
+	static CCDictionary<std::string, CCObject*> *dictionaryWithContentsOfFile(const char *pFileName, bool isUsingCCNumber);
 	/*
 	@brief The same meaning as dictionaryWithContentsOfFile(), but it doesn't call autorelease, so the
 	       invoker should call release().
 	*/
 	static CCDictionary<std::string, CCObject*> *dictionaryWithContentsOfFileThreadSafe(const char *pFileName);
+	static CCDictionary<std::string, CCObject*> *dictionaryWithContentsOfFileThreadSafe(const char *pFileName, bool isUsingCCNumber);
+	
+	// added by YoungJae Kwon
+    // do not write dictionary read from "dictionaryWithContentsOfFile" function without isUsingCCNumber
+    static bool writeDictionaryToFile(CCDictionary<std::string, CCObject*>* aDic, const char *pFileName, bool isUsingCCNumber)
+    {
+        if( isUsingCCNumber == false )
+            CCAssert(0, "plist writer not using CCNumber is not implemented yet");
+        
+        CCPropertyListWriter* writer = new CCPropertyListWriter();
+        bool result = writer->writeToFile(aDic, pFileName);
+        delete writer;
 
+        return result;
+    }
+    
 	/**
 	@brief   Get the writeable path
 	@return  The path that can write/read file
@@ -182,6 +199,27 @@ public:
     // interfaces on ios
     ///////////////////////////////////////////////////
     static int ccLoadFileIntoMemory(const char *filename, unsigned char **out);
+	
+	// added by YoungJae Kwon
+	// check file existance in zip(apk in Android platform)
+	static bool isFileExistInZip(const char* pszZipFilePath, const char* pszFileName);
+	// will be deprecated, use "isFileExistInResourcePath()" instead
+	static bool isFileExistInAPK(const char* pszFileName); 
+	static bool isFileExistInResourcePath(const char* pszFileName);
+    static bool isFileExistAtWritablePath(const char* filename)
+    {
+        FILE *filePt;
+        string path = getWriteablePath() + filename;
+        
+        filePt = fopen(path.c_str(), "r");
+        if (filePt == NULL) {
+            return false;
+        } else {
+            fclose(filePt);
+            return true;
+        }
+    }
+
 };
 
 class CCFileData

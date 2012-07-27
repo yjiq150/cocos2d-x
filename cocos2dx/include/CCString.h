@@ -44,6 +44,20 @@ namespace cocos2d {
 		}
 		virtual ~CCString(){ m_sString.clear(); }
 		
+		static CCString* makeString(const char * str){
+			CCString* ret = new CCString(str);
+			if (ret) {
+				ret->autorelease();
+			} else {
+				delete ret;
+				ret = NULL;
+			}
+			return ret;
+		}
+		static CCString* getString(const char * str){
+			return CCString::makeString(str);
+		}  
+		
 		int toInt()
 		{
 			return atoi(m_sString.c_str());
@@ -99,6 +113,19 @@ namespace cocos2d {
             } while (false);
             return pszRet;
         }
+
+		//added by YoungJae Kwon
+		static std::string stringWithFormat(const char * pszFormat, ...)
+		{
+		    char szBuf[255];
+
+		    va_list ap;
+		    va_start(ap, pszFormat);
+		    vsprintf(szBuf, pszFormat, ap);
+		    va_end(ap);
+		    std::string ret = szBuf;
+		    return ret;
+		}
 	};
 }// namespace cocos2d
 #endif //__CCSTRING_H__

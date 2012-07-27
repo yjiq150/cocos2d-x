@@ -206,6 +206,76 @@ void ccDrawPoly(const CCPoint *poli, int numberOfPoints, bool closePolygon, bool
     delete[] newPoint;
 }
 
+void ccFillPolyStencil(const CCPoint *poli, int numberOfPoints)
+{
+    ccVertex2F* newPoint = new ccVertex2F[numberOfPoints];
+    if (! newPoint)
+    {
+        return;
+    }
+    // Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+    // Needed states: GL_VERTEX_ARRAY, 
+    // Unneeded states: GL_TEXTURE_2D, GL_TEXTURE_COORD_ARRAY, GL_COLOR_ARRAY	
+    glDisable(GL_TEXTURE_2D);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+   
+   
+    // iPhone and 32-bit machines
+    if( sizeof(CCPoint) == sizeof(ccVertex2F) ) 
+    {
+        // convert to pixels ?
+        if( CC_CONTENT_SCALE_FACTOR() != 1 ) 
+        {
+            memcpy( newPoint, poli, numberOfPoints * sizeof(ccVertex2F) );
+            for( int i=0; i<numberOfPoints;i++)
+            {
+                newPoint[i].x = poli[i].x * CC_CONTENT_SCALE_FACTOR();
+                newPoint[i].y = poli[i].y * CC_CONTENT_SCALE_FACTOR();
+            }
+            glVertexPointer(2, GL_FLOAT, 0, newPoint);
+           
+        } 
+        else
+        {
+            glVertexPointer(2, GL_FLOAT, 0, poli);
+        }
+       
+       
+    } 
+    else 
+    {
+        // 64-bit machines (Mac)
+       
+        for( int i=0; i<numberOfPoints;i++)
+        {
+            newPoint[i].x = poli[i].x;
+            newPoint[i].y = poli[i].y;
+        }
+       
+        glVertexPointer(2, GL_FLOAT, 0, newPoint );
+       
+    }
+//        glColor4f(255, 255, 255, 255);
+   
+    // use only stencil pixels info
+    glDepthMask(GL_FALSE);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+   
+        glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei)numberOfPoints);
+   
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glDepthMask(GL_TRUE);
+   
+
+    // restore default state
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnable(GL_TEXTURE_2D);
+    delete[] newPoint;
+}
+
+
 void ccDrawCircle(const CCPoint& center, float r, float a, int segs, bool drawLineToCenter)
 {
 	int additionalSegment = 1;

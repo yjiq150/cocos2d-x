@@ -96,6 +96,53 @@ void CCSet::removeObject(CCObject *pObject)
 	CC_SAFE_RELEASE(pObject);
 }
 
+// added by YoungJae Kwon for targted multitouch
+void CCSet::addSubset(CCSet *pSet)
+{
+	CCSetIterator it;
+	for(it = pSet->begin(); it != pSet->end(); ++it)
+	{
+		CC_SAFE_RETAIN((*it));
+		m_pSet->insert(*it);
+	}
+	
+}
+	
+// added by YoungJae Kwon for targted multitouch
+void CCSet::removeSubset(CCSet *pSet)
+{
+	CCSetIterator it;
+	for(it = pSet->begin(); it != pSet->end(); ++it)
+	{
+		m_pSet->erase(*it);
+		CC_SAFE_RELEASE((*it));
+	}
+	
+}
+// added by YoungJae Kwon for targted multitouch
+bool CCSet::containsSubset(CCSet *pSet)
+{
+	CCSetIterator it;
+	for(it = pSet->begin(); it != pSet->end(); ++it)
+	{
+		if(m_pSet->find(*it) == m_pSet->end())
+		{
+			return false;
+		}
+	}
+	return true;
+}	
+	
+void CCSet::removeAllObjects()
+{
+	CCSetIterator it;
+	for (it = m_pSet->begin(); it != m_pSet->end(); ++it)
+	{
+		CC_SAFE_RELEASE((*it));
+	}
+	m_pSet->clear();
+}
+	
 bool CCSet::containsObject(CCObject *pObject)
 {
 	return m_pSet->find(pObject) != m_pSet->end();
