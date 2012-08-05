@@ -37,6 +37,8 @@ THE SOFTWARE.
 #include "support/zip_support/unzip.h"
 #include "ccTypes.h"
 
+#include "CCNumber.h"
+
 #define MAX_PATH 260
 
 using namespace cocos2d;
@@ -116,13 +118,13 @@ static NSString* getPathForSuffix(NSString *path, NSString *suffix)
     
 	if( [__localFileManager fileExistsAtPath:newName] )
 		return newName;
-    
-	CCLOG("cocos2d: CCFileUtils: Warning file not found: %s", [[newName lastPathComponent] UTF8String] );
+// Commented by youngJae Kwon
+//	CCLOG("cocos2d: CCFileUtils: Warning file not found: %s", [[newName lastPathComponent] UTF8String] );
     
 	return nil;
 }
 
-static void static_addItemToCCArray(id item, CCMutableArray<CCObject*> *pArray)
+static void static_addItemToCCArray(id item, CCObject* pArray, bool isUsingCCNumber)
 {
 	// add string value into array
     if ([item isKindOfClass:[NSString class]]) {

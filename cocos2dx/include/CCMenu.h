@@ -30,6 +30,9 @@ THE SOFTWARE.
 
 namespace cocos2d{
 
+    // added by YoungJae Kwon
+    class CCSet;
+    
 	typedef enum  
 	{
         kCCMenuStateWaiting,

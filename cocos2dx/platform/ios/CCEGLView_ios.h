@@ -27,11 +27,17 @@ THE SOFTWARE.
 
 #include "CCCommon.h"
 
+// added by YoungJae Kwon
+#include "CCGeometry.h"
+
 namespace   cocos2d {
 class CCSet;
 class CCTouch;
 class EGLTouchDelegate;
 class CCSize;
+
+// added by YoungJae Kwon
+class CCRect;
 
 class CC_DLL CCEGLView
 {

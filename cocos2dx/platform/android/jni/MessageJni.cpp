@@ -31,6 +31,10 @@ THE SOFTWARE.
 #include <jni.h>
 
 
+#include "CCScene.h"
+#include "CCDirector.h"
+
+
 #if 0
 #define  LOG_TAG    "MessageJni"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
@@ -127,8 +131,19 @@ extern "C"
 		cocos2d::CCFileUtils::setResourcePath(str);
 		env->ReleaseStringUTFChars(apkPath, str);
 	}
-}
 
+	// added by YoungJae Kwon
+	// for Android Device Orientation change
+	void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnOrientationChange(JNIEnv*  env, jobject thiz, jboolean isPortrait)
+	{
+		CCScene*scene = cocos2d::CCDirector::sharedDirector()->getRunningScene();
+		if( scene )
+		{
+			scene->onOrientationChange((bool)isPortrait);
+		}
+	}
+
+	// added by YoungJae Kwon
 	void disableOrientationChangeJNI()
 	{
 		JniMethodInfo t;
@@ -142,6 +157,8 @@ extern "C"
 			t.env->DeleteLocalRef(t.classID);
 		}
 	}
+
+	// added by YoungJae Kwon
 	void enableOrientationChangeJNI()
 	{
 		JniMethodInfo t;
@@ -155,4 +172,36 @@ extern "C"
 			t.env->DeleteLocalRef(t.classID);
 		}
 	}
+
+	// added by YoungJae Kwon
+	void setOrientationLandscapeJNI()
+	{
+		JniMethodInfo t;
+
+		if (JniHelper::getStaticMethodInfo(t
+			, "org/cocos2dx/lib/Cocos2dxActivity"
+			, "setOrientationLandscape"
+			, "()V"))
+		{
+			t.env->CallStaticVoidMethod(t.classID, t.methodID);
+			t.env->DeleteLocalRef(t.classID);
+		}
+	}
+
+	// added by YoungJae Kwon
+	void setOrientationPortraitJNI()
+	{
+		JniMethodInfo t;
+
+		if (JniHelper::getStaticMethodInfo(t
+			, "org/cocos2dx/lib/Cocos2dxActivity"
+			, "setOrientationPortrait"
+			, "()V"))
+		{
+			t.env->CallStaticVoidMethod(t.classID, t.methodID);
+			t.env->DeleteLocalRef(t.classID);
+		}
+	}
+
+
 }

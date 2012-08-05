@@ -124,6 +124,9 @@ public:
 	/* Shrinks the array so the memory footprint corresponds with the number of items */
     void reduceMemoryFootprint();
 
+    // added by YoungJae Kwon
+    static CCArray* arrayWithObjects(CCObject* objects, ...);
+    void addObjects(CCObject* objects, ...);
     virtual std::string getClassName()
     { 
         std::string className("CCArray");

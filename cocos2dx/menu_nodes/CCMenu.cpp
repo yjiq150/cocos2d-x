@@ -33,6 +33,9 @@ THE SOFTWARE.
 #include <vector>
 #include <stdarg.h>
 
+// added by YoungJae Kwon
+#include "CCSet.h"
+
 using namespace std;
 
 namespace cocos2d{

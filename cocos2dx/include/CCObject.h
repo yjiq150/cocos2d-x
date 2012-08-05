@@ -25,6 +25,7 @@ THE SOFTWARE.
 #ifndef __COCOA_NSOBJECT_H__
 #define __COCOA_NSOBJECT_H__
 
+#include <string>
 #include "CCCommon.h"
 #include "ccTypes.h"
 

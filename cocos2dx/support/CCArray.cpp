@@ -76,6 +76,7 @@ CCArray* CCArray::arrayWithArray(CCArray* otherArray)
     return pArray;
 }
 
+// added by YoungJae Kwon
 CCArray* CCArray::arrayWithObjects(CCObject* objects, ...)
 {
 	CCArray* pArray = CCArray::array();
@@ -167,6 +168,7 @@ void CCArray::addObject(CCObject* object)
     ccArrayAppendObjectWithResize(data, object);
 }
 
+// added by YoungJae Kwon
 void CCArray::addObjects(CCObject* objects, ...)
 {
     va_list ap;

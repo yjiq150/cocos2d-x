@@ -33,6 +33,9 @@ THE SOFTWARE.
 #include "CCScriptSupport.h"
 #include <stdarg.h>
 
+// added by YoungJae Kwon
+#include "CCDirector.h"
+
 namespace cocos2d{
     
     static unsigned int _fontSize = kCCItemSize;
@@ -571,6 +574,7 @@ namespace cocos2d{
 		}
 		else 
 		{
+            
         m_pNormalImage->setIsVisible(true);
         
         if (m_pSelectedImage)
@@ -581,6 +585,8 @@ namespace cocos2d{
         if (m_pDisabledImage)
         {
             m_pDisabledImage->setIsVisible(false);
+        }
+            
         }
     }
     
@@ -697,10 +703,11 @@ namespace cocos2d{
         }
         return initFromNormalSprite(normalSprite, selectedSprite, disabledSprite, target, selector);
     }
+    
     //
-	// MenuItemOneImage
+	// CCMenuItemScaleOnTouch
 	//
-	// added by YOungJae Kwon
+	// added by YoungJae Kwon
 
 	CCNode * CCMenuItemScaleOnTouch::getNormalImage()
 	{
@@ -749,19 +756,19 @@ namespace cocos2d{
 	
 	void CCMenuItemScaleOnTouch::setOpacity(GLubyte opacity)
     {
-        m_pNormalImage->convertToRGBAProtocol()->setOpacity(opacity);
+        dynamic_cast<CCRGBAProtocol*>(m_pNormalImage)->setOpacity(opacity);
     }
-    void CCMenuItemScaleOnTouch::setColor(ccColor3B color)
+    void CCMenuItemScaleOnTouch::setColor(const ccColor3B& color)
     {
-        m_pNormalImage->convertToRGBAProtocol()->setColor(color);
+        dynamic_cast<CCRGBAProtocol*>(m_pNormalImage)->setColor(color);
     }
     GLubyte CCMenuItemScaleOnTouch::getOpacity()
     {
-        return m_pNormalImage->convertToRGBAProtocol()->getOpacity();
+        return dynamic_cast<CCRGBAProtocol*>(m_pNormalImage)->getOpacity();
     }
-    ccColor3B CCMenuItemScaleOnTouch::getColor()
+    const ccColor3B& CCMenuItemScaleOnTouch::getColor()
     {
-        return m_pNormalImage->convertToRGBAProtocol()->getColor();
+        return dynamic_cast<CCRGBAProtocol*>(m_pNormalImage)->getColor();
     }
 	
     /**

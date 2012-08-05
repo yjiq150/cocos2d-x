@@ -6,8 +6,7 @@
 #include "CCObject.h"
 #include "CCMutableDictionary.h"
 #include "CCTexture2D.h"
-#include "selector_protocol.h"
-
+/*
 
 namespace   cocos2d {
 
@@ -17,7 +16,7 @@ class CCThreadQueueTask : public CCObject
 {
 public:
 	SEL_CallFunc m_pfnTask;
-	SelectorProtocol* m_pTarget;
+	CCObject* m_pTarget;
 	
 	CCThreadQueueTask();
 	virtual ~CCThreadQueueTask();
@@ -39,7 +38,7 @@ public:
 
 	static CCThreadQueue * sharedThreadQueue();
 	
-	void addFunction(SelectorProtocol *target, SEL_CallFunc selector);
+	void addFunction(CCObject *target, SEL_CallFunc selector);
 
 	//MOD: if additional arguments required, implement!
 //	void addFunction(SelectorProtocol *target, SEL_CallFuncO selector);
@@ -64,6 +63,8 @@ protected:
 };
 
 }//namespace   cocos2d 
+
+ */
 
 #endif //__CCThreadQueue_H__
 

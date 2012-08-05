@@ -281,6 +281,7 @@ static cocos2d::CCTouch *s_pTouches[MAX_TOUCHES];
 
     
     // added by YoungJae Kwon
+    //CustomRetina:
     float scaleFactor = cocos2d::CCDirector::sharedDirector()->getContentScaleFactor();
     
     cocos2d::CCSize size;

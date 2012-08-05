@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "platform/platform.h"
 #include "support/ccUtils.h"
 
+/*
 namespace   cocos2d 
 {
 /////////////////////////////////////	
@@ -133,3 +134,5 @@ void CCThreadQueue::addFunction(SelectorProtocol *target, SEL_CallFunc selector)
 
 }//namespace   cocos2d 
 
+
+*/

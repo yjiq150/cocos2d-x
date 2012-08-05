@@ -487,10 +487,8 @@ public:
     bool enableCustomRetinaDisplay(float factor);
     bool isCustomRetinaEnabled();
     void resetRetinaDisplay();    
-	void setDeviceScreenSize(int w, int h);
-	CCSize getDeviceScreenSize();	
+
 protected:
-	CCSize deviceScreenSize;
     bool m_bIsCustomRetinaEnabled;
 };
 

@@ -43,6 +43,9 @@ THE SOFTWARE.
 #include "CCScheduler.h"
 #include "CCThread.h"
 
+// added by YoungJae Kwon
+#include "CCRenderTexture.h"
+
 namespace   cocos2d {
 
 typedef struct _AsyncStruct
@@ -173,11 +176,11 @@ CCTextureCache::CCTextureCache()
 	m_pTextures = new CCMutableDictionary<std::string, CCTexture2D*>();
 		m_pRenderTextures = new CCMutableDictionary<std::string, CCRenderTexture*>();
 
+    //THREAD_OLD:
 		// thread variable init
-		pthread_mutex_init(&s_taskQueueLock, NULL);
-		pthread_mutex_init(&s_readyQueueLock, NULL);
-		
-		CCScheduler::sharedScheduler()->scheduleSelector(schedule_selector(CCTextureCache::addImageAsyncCallBack), this, 0, false);
+//		pthread_mutex_init(&s_taskQueueLock, NULL);
+//		pthread_mutex_init(&s_readyQueueLock, NULL);
+//		CCScheduler::sharedScheduler()->scheduleSelector(schedule_selector(CCTextureCache::addImageAsyncCallBack), this, 0, false);
 		
 		maxTasksInQueue = 0;
 		

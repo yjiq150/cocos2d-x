@@ -483,7 +483,7 @@ void CCLayerColor::setContentSize(const CCSize& size)
 	m_pSquareVertices[2].y = size.height * CC_CONTENT_SCALE_FACTOR();
 	m_pSquareVertices[3].x = size.width * CC_CONTENT_SCALE_FACTOR();
 	m_pSquareVertices[3].y = size.height * CC_CONTENT_SCALE_FACTOR();
-
+    }
 	CCLayer::setContentSize(size);
 }
 

@@ -268,7 +268,7 @@ namespace cocos2d{
         /** creates a menu item with a normal,selected  and disabled image with target/selector */
         static CCMenuItemImage* itemFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, CCObject* target, SEL_MenuHandler selector);
         /** initializes a menu item with a normal, selected  and disabled image with target/selector */
-		bool initFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, SelectorProtocol* target, SEL_MenuHandler selector);
+		bool initFromNormalImage(const char *normalImage, const char *selectedImage, const char *disabledImage, CCObject* target, SEL_MenuHandler selector);
         
         // added by YoungJae Kwon for Pocoyo RTTI code convert
         virtual std::string getClassName()

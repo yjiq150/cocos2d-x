@@ -12,7 +12,6 @@
 USING_NS_CC;
 CCSymbol::CCSymbol()
 {
-	m_eTouchDelegateType = ccTouchDelegateAllBit;
 	// LEETAEHO 0.5 to 0.0
 	//m_tAnchorPoint = ccp(0.5f, 0.5f);
 	m_tAnchorPoint = ccp(0.0f, 0.0f);
@@ -254,34 +253,18 @@ void CCSymbol::onExit()
 
 void CCSymbol::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
 {
-	if (isScriptHandlerExist(CCTOUCHBEGAN))
-	{
-		excuteScriptTouchesHandler(CCTOUCHBEGAN, pTouches);
-	}
 }
 
 void CCSymbol::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
 {
-	if (isScriptHandlerExist(CCTOUCHENDED))
-	{
-		excuteScriptTouchesHandler(CCTOUCHENDED, pTouches);
-	}
 }
 
 void CCSymbol::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 {
-	if (isScriptHandlerExist(CCTOUCHMOVED))
-	{
-		excuteScriptTouchesHandler(CCTOUCHMOVED, pTouches);
-	}
 }
 
 void CCSymbol::ccTouchesCancelled(CCSet *pTouches, CCEvent *pEvent)
 {
-	if (isScriptHandlerExist(CCTOUCHCANCELLED))
-	{
-		excuteScriptTouchesHandler(CCTOUCHCANCELLED, pTouches);
-	}
 }
 
 CCSymbol::~CCSymbol()

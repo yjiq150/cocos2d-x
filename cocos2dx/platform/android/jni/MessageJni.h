@@ -29,8 +29,12 @@ extern "C"
 {
 	extern void showMessageBoxJNI(const char * pszMsg, const char * pszTitle);
 	extern void terminateProcessJNI();
+
+	// added by YoungJae Kwon
 	extern void disableOrientationChangeJNI();
 	extern void enableOrientationChangeJNI();
+	extern void setOrientationLandscapeJNI();
+	extern void setOrientationPortraitJNI();
 }
 
 #endif // __ANDROID_MESSAGE_JNI_H__

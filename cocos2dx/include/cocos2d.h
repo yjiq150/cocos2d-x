@@ -135,6 +135,8 @@ THE SOFTWARE.
 #include "CCValue.h"
 #include "CCSymbol.h"
 
+#include "CCNS.h" // for outside usage in LevelHelper 
+
 namespace   cocos2d {
 
 const char* cocos2dVersion();

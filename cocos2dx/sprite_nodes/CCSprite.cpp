@@ -674,7 +674,7 @@ void CCSprite::draw(void)
 
 	// added By YoungJae Kwon
 	// update node opacity based on parent's opacity
-	updateOpacityBasedOnParents();
+	//updateOpacityBasedOnParents();
 	
 	long offset = (long)&m_sQuad;
 
@@ -960,7 +960,7 @@ void CCSprite::updateOpacityBasedOnParents(void)
 	}
 	
 	opacityForDrawing = (GLubyte)(alpha * m_nOpacity);
-	
+    
 	if (m_bOpacityModifyRGB)
 	{
 		m_sColor.r = m_sColorUnmodified.r * opacityForDrawing/255;
@@ -997,6 +997,8 @@ void CCSprite::updateOpacityBasedOnParents(void)
 void CCSprite::updateColor(void)
 {
 
+    /*
+     //MOD: added by youngJae Kwon
 	if (m_bOpacityModifyRGB)
 	{
 		m_sColor.r = m_sColorUnmodified.r * m_nOpacity/255;
@@ -1004,7 +1006,6 @@ void CCSprite::updateColor(void)
 		m_sColor.b = m_sColorUnmodified.b * m_nOpacity/255;
 	}
 	
-	//MOD: added by youngJae Kwon
 	GLubyte opacityForDrawing;
 	float alpha = 1.0f;
 	CCNode* parentNode = this->getParent();
@@ -1020,7 +1021,8 @@ void CCSprite::updateColor(void)
 
 	
 	ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, opacityForDrawing };
-	//ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, m_nOpacity };
+    */
+	ccColor4B color4 = { m_sColor.r, m_sColor.g, m_sColor.b, m_nOpacity };
 
 	m_sQuad.bl.colors = color4;
 	m_sQuad.br.colors = color4;

@@ -154,6 +154,11 @@ protected:
 private:
     class LengthStack;
     LengthStack * m_pLens;
+    
+
+    // added by YoungJae Kwon
+    CC_SYNTHESIZE(bool, isPasswordText, IsPasswordText);
+    std::string * m_pPasswordActualText;
 };
 
 NS_CC_END;

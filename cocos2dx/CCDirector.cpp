@@ -289,12 +289,6 @@ void CCDirector::setOpenGLView(CC_GLVIEW *pobOpenGLView)
 		m_obWinSizeInPoints = m_pobOpenGLView->getSize();
 		m_obWinSizeInPixels = CCSizeMake(m_obWinSizeInPoints.width * m_fContentScaleFactor, m_obWinSizeInPoints.height * m_fContentScaleFactor);
         setGLDefaultValues();
-
-		// added by YoungJaeKwon
-		// default value of deviceScreenSize = glViewSize from java surfaceView
-		// if these two value are different, call explicitly setDeviceScreenSize
-		deviceScreenSize = m_obWinSizeInPoints;
-		
 		
 		if (m_fContentScaleFactor != 1)
 		{
@@ -446,31 +440,32 @@ CCPoint CCDirector::convertToGL(const CCPoint& obPoint)
 
 CCPoint CCDirector::convertToUI(const CCPoint& obPoint)
 {
+    CCPoint point;
     if( CC_IS_CUSTOM_RETINA() )
     {
-        obPoint.x /= CC_CONTENT_SCALE_FACTOR();
-        obPoint.y /= CC_CONTENT_SCALE_FACTOR();
+        point.x = obPoint.x / CC_CONTENT_SCALE_FACTOR();
+        point.y = obPoint.y / CC_CONTENT_SCALE_FACTOR();
     }
     
 	CCSize winSize = m_obWinSizeInPoints;
-	float oppositeX = winSize.width - obPoint.x;
-	float oppositeY = winSize.height - obPoint.y;
+	float oppositeX = winSize.width - point.x;
+	float oppositeY = winSize.height - point.y;
 	CCPoint uiPoint = CCPointZero;
 
 	switch (m_eDeviceOrientation)
 	{
 	case CCDeviceOrientationPortrait:
-		uiPoint = ccp(obPoint.x, oppositeY);
+		uiPoint = ccp(point.x, oppositeY);
 		break;
 	case CCDeviceOrientationPortraitUpsideDown:
-		uiPoint = ccp(oppositeX, obPoint.y);
+		uiPoint = ccp(oppositeX, point.y);
 		break;
 	case CCDeviceOrientationLandscapeLeft:
-		uiPoint = ccp(obPoint.y, obPoint.x);
+		uiPoint = ccp(point.y, point.x);
 		break;
 	case CCDeviceOrientationLandscapeRight:
 		// Can't use oppositeX/Y because x/y are flipped
-		uiPoint = ccp(winSize.width - obPoint.y, winSize.height - obPoint.x);
+		uiPoint = ccp(winSize.width - point.y, winSize.height - point.x);
 		break;
 	}
 
@@ -832,10 +827,10 @@ bool CCDirector::enableRetinaDisplay(bool enabled)
 	}
 
 	// SD device
-	if (m_pobOpenGLView->getMainScreenScale() == 1.0)
-	{
-		return false;
-	}
+//	if (m_pobOpenGLView->getMainScreenScale() == 1.0)
+//	{
+//		return false;
+//	}
 
 	float newScale = (float)(enabled ? m_fCustomScaleFactor : 1);
 	setContentScaleFactor(newScale);
@@ -955,20 +950,6 @@ void CCDirector::setDeviceOrientation(ccDeviceOrientation kDeviceOrientation)
         m_obWinSizeInPixels = CCSizeMake(m_obWinSizeInPoints.width * m_fContentScaleFactor, m_obWinSizeInPoints.height * m_fContentScaleFactor);
         setProjection(m_eProjection);
     }
-}
-
-
-// added by YoungJae Kwon
-// screenSize used for scaling CCScene.( refer CCScene::init() )
-void CCDirector::setDeviceScreenSize(int w, int h)
-{
-	deviceScreenSize.width = w;
-	deviceScreenSize.height = h;
-}
-
-CCSize CCDirector::getDeviceScreenSize()
-{
-	return deviceScreenSize;
 }
 
 /***************************************************

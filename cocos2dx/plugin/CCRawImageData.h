@@ -3,7 +3,7 @@
  *  CocosX_test
  *
  *  Created by YoungJae Kwon on 11. 5. 28..
- *  Copyright 2011 Viscuit Creative Inc. All rights reserved.
+ *  Copyright 2011 Beyondi Soft All rights reserved.
  *
  */
 

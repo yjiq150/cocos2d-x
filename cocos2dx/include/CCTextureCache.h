@@ -54,7 +54,7 @@ class CCImage;
         virtual void execute();
 		
         SEL_CallFuncO selector;
-        SelectorProtocol* target;
+        CCObject* target;
 		
 		CCImage* loadedImage; 
 		
@@ -211,7 +211,7 @@ typedef enum {
 	kInvalid = 0,
 	kImageFile,
 	kImageData,
-            kString
+	kString,
 }ccCachedImageType;
 
 public:

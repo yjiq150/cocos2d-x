@@ -5,6 +5,7 @@
 #include "android/jni/SystemInfoJni.h"
 #include <android/log.h>
 #include <jni.h>
+#include "android/jni/OpenURLJni.h"
 
 #include <cstring>
 

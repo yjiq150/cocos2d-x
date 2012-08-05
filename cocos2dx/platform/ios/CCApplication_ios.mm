@@ -29,6 +29,9 @@
 #import "CCGeometry.h"
 #import "CCDirectorCaller.h"
 
+#include <string>
+
+using namespace std;
 NS_CC_BEGIN;
 
 CCApplication* CCApplication::sm_pSharedApplication = 0;

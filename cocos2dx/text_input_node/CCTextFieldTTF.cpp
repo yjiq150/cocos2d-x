@@ -55,14 +55,21 @@ CCTextFieldTTF::CCTextFieldTTF()
 , m_nCharCount(0)
 , m_pInputText(new std::string)
 , m_pPlaceHolder(new std::string)   // prevent CCLabelTTF initWithString assertion
+, m_pPasswordActualText(new std::string)
 {
     m_ColorSpaceHolder.r = m_ColorSpaceHolder.g = m_ColorSpaceHolder.b = 127;
+    
+    // added by YoungJae Kwon
+    isPasswordText = false;
 }
 
 CCTextFieldTTF::~CCTextFieldTTF()
 {
     CC_SAFE_DELETE(m_pInputText);
     CC_SAFE_DELETE(m_pPlaceHolder);
+    
+    // added by YoungJae Kwon
+    CC_SAFE_DELETE(m_pPasswordActualText);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -170,7 +177,7 @@ bool CCTextFieldTTF::canDetachWithIME()
 
 void CCTextFieldTTF::insertText(const char * text, int len)
 {
-    std::string sInsert(text, len);
+    std::string sInsert(text,len);
 
     // insert \n means input end
     int nPos = sInsert.find('\n');
@@ -277,11 +284,23 @@ void CCTextFieldTTF::draw()
 // input text property
 void CCTextFieldTTF::setString(const char *text)
 {
+    
     CC_SAFE_DELETE(m_pInputText);
 
     if (text)
     {
-        m_pInputText = new std::string(text);
+        if (isPasswordText) {
+            m_pPasswordActualText = new std::string(text);
+            char buf[128];
+            int i;
+            for (i = 0; i < strlen(text); i++)
+                buf[i] = '*';
+            
+            buf[i] = '\0';
+            m_pInputText = new std::string(buf);
+        }
+        else
+            m_pInputText = new std::string(text);
     }
     else
     {
@@ -302,7 +321,10 @@ void CCTextFieldTTF::setString(const char *text)
 
 const char* CCTextFieldTTF::getString(void)
 {
-    return m_pInputText->c_str();
+    if( isPasswordText )
+        return m_pPasswordActualText->c_str();
+    else
+        return m_pInputText->c_str();
 }
 
 // place holder text property

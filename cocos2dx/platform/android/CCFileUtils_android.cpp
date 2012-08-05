@@ -39,20 +39,23 @@ void CCFileUtils::setResourcePath(const char* pszResourcePath)
 	
 	string tmp(pszResourcePath);
 
-	if ((! pszResourcePath) || tmp.find(".apk") == string::npos)
+//	if ((! pszResourcePath) || tmp.find(".apk") == string::npos)
+	if ( !pszResourcePath )
 	{
 		return;
 	}
 
 	s_strResourcePath = pszResourcePath;
+	CCLog("setResourcePath:%s",s_strResourcePath.c_str() );
 }
 
 const char* CCFileUtils::fullPathFromRelativePath(const char *pszRelativePath, ccResolutionType *pResolutionType)
 {
 	if (s_strResourcePath.find(".apk") != string::npos)
 	{
-	return pszRelativePath;
-}
+
+		return pszRelativePath;
+	}
 	else
 	{
 		// if it is absolute path

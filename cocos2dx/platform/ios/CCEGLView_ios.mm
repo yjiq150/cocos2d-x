@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include "CCSet.h"
 #include "CCTouch.h"
 #include "CCTouchDispatcher.h"
+#include "CCDirector.h"
+
 
 namespace cocos2d {
 
@@ -98,8 +100,9 @@ bool CCEGLView::isOpenGLReady()
     {
         //return true;
 		//modified by LEETAEHO 11.07.12 : for use iphone4 image to iphone3
-        if( [[UIScreen mainScreen] bounds].size.width <= 480 )
-            return true;
+//        if( [[UIScreen mainScreen] bounds].size.width <= 480 ) // 패드는 그대로, 폰만 custom scaling
+//            return true;
+        return true; // 폰 패드 모두 custom scaling 가능해짐.
 #ifdef PD_IPHONE
 		return true;
 #else
