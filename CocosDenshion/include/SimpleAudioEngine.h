@@ -31,6 +31,13 @@ THE SOFTWARE.
 
 namespace CocosDenshion {
 
+	//Added by YoungJae Kwon
+	typedef enum AudioPlayerType
+	{
+		kAudio_Effect = 0,
+		kAudio_Background = 1,
+		kAudio_Voice = 2
+	} AudioPlayerType;	
 /**
 @class          SimpleAudioEngine
 @brief  		offer a VERY simple interface to play background music & sound effect
@@ -178,6 +185,18 @@ public:
     @param[in]		pszFilePath		The path of the effect file,or the FileName of T_SoundResInfo
     */
     void unloadEffect(const char* pszFilePath);
+	
+	// Added By youngJae Kwon
+	// ------------voice channel added ----------
+	void playVoice(const char* pszFilePath);
+	void stopVoice(bool bReleaseData = false);
+	void pauseVoice();
+	void resumeVoice();
+	
+	// Mute added
+	void setVoiceMute(bool isMute);
+	void setEffectMute(bool isMute);
+	void setBGMMute(bool isMute);
 };
 
 } // end of namespace CocosDenshion

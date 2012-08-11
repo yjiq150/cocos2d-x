@@ -161,6 +161,14 @@ typedef enum {
 	//For handling resign/become active
 	BOOL _isObservingAppEvents;
 	tAudioManagerResignBehavior _resignBehavior;
+    
+    //Added by YoungJae Kwon
+    CDLongAudioSource	*voice;
+    BOOL willPlayVoice;
+    BOOL _muteVoice;
+    BOOL _muteBackgroundMusic;
+    BOOL _muteEffect;
+    NSString *_currentBGMPath; 
 }
 
 @property (readonly) CDSoundEngine *soundEngine;
@@ -218,6 +226,22 @@ typedef enum {
 -(BOOL) isBackgroundMusicPlaying;
 
 -(void) setBackgroundMusicCompletionListener:(id) listener selector:(SEL) selector;
+
+//Added by YoungJae Kwon
+// provide voice narration channel
+@property (readonly) CDLongAudioSource *voice;
+@property (readonly) BOOL willPlayVoice;
+-(void) playVoice:(NSString*) filePath;
+-(void) preloadVoice:(NSString*) filePath;
+-(void) stopVoice;
+-(void) pauseVoice;
+-(void) rewindVoice;
+-(void) resumeVoice;
+-(BOOL) isVoicePlaying;
+
+-(void) setBackgroundMusicMute:(BOOL) muteValue;
+-(void) setVoiceMute:(BOOL) muteValue;
+-(void) setEffectMute:(BOOL) muteValue;
 
 @end
 

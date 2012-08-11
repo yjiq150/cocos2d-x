@@ -97,4 +97,21 @@
 /** Shuts down the shared audio engine instance so that it can be reinitialised */
 +(void) end;
 
+
+// added by YoungJae Kwon
+@property (readwrite) float voiceVolume;
+@property (readonly) BOOL willPlayVoice;
+
+-(void) preloadVoice:(NSString*) filePath;
+-(void) playVoice:(NSString*) filePath;
+-(void) stopVoice;
+-(void) pauseVoice;
+-(void) resumeVoice;
+-(void) rewindVoice;
+-(BOOL) isVoicePlaying;
+
+-(void) setBackgroundMusicMute:(BOOL) muteValue;
+-(void) setVoiceMute:(BOOL) muteValue;
+-(void) setEffectMute:(BOOL) muteValue;
+
 @end

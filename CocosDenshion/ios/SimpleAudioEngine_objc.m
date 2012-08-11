@@ -237,4 +237,65 @@ static CDBufferManager *bufferManager = nil;
 	}	
 }	
 
+// added by YoungJae Kwon
+-(float) voiceVolume
+{
+	return am.voice.volume;
+}	
+
+-(void) setVoiceVolume:(float) volume
+{
+	am.voice.volume = volume;
+}
+
+
+-(void) preloadVoice:(NSString*) filePath {
+	[am preloadVoice:filePath];
+}
+
+-(void) playVoice:(NSString*) filePath
+{
+	[am playVoice:filePath];
+}
+
+-(void) stopVoice
+{
+	[am stopVoice];
+}
+
+-(void) pauseVoice {
+	[am pauseVoice];
+}	
+
+-(void) resumeVoice {
+	[am resumeVoice];
+}	
+
+-(void) rewindVoice {
+	[am rewindVoice];
+}
+
+-(BOOL) isVoicePlaying {
+	return [am isVoicePlaying];
+}	
+
+-(BOOL) willPlayVoice {
+	return [am willPlayVoice];
+}
+
+-(void) setBackgroundMusicMute:(BOOL) muteValue
+{
+    [am setBackgroundMusicMute:muteValue];
+}
+
+-(void) setVoiceMute:(BOOL) muteValue
+{
+    [am setVoiceMute:muteValue];
+}
+
+-(void) setEffectMute:(BOOL) muteValue
+{
+    [am setEffectMute:muteValue];
+}
+
 @end 

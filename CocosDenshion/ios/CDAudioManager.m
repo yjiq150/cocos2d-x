@@ -231,6 +231,7 @@ NSString * const kCDN_AudioManagerInitialised = @"kCDN_AudioManagerInitialised";
 
 @implementation CDAudioManager
 #define BACKGROUND_MUSIC_CHANNEL kASC_Left
+#define VOICE_CHANNEL kASC_Right
 
 @synthesize soundEngine, willPlayBackgroundMusic;
 static CDAudioManager *sharedManager;
@@ -334,6 +335,7 @@ static BOOL configured = FALSE;
 			//_audioSessionCategory = kAudioSessionCategory_AmbientSound;
 			_audioSessionCategory = AVAudioSessionCategoryAmbient;
 			willPlayBackgroundMusic = NO;
+            willPlayVoice = NO;
 			break;
 			
 		case kAMM_FxPlusMusic:
@@ -342,6 +344,7 @@ static BOOL configured = FALSE;
 			//_audioSessionCategory = kAudioSessionCategory_SoloAmbientSound;
 			_audioSessionCategory = AVAudioSessionCategorySoloAmbient;
 			willPlayBackgroundMusic = YES;
+            willPlayVoice = YES;
 			break;
 			
 		case kAMM_MediaPlayback:
@@ -350,6 +353,7 @@ static BOOL configured = FALSE;
 			//_audioSessionCategory = kAudioSessionCategory_MediaPlayback;
 			_audioSessionCategory = AVAudioSessionCategoryPlayback;
 			willPlayBackgroundMusic = YES;
+            willPlayVoice = YES;
 			break;
 			
 		case kAMM_PlayAndRecord:
@@ -358,6 +362,7 @@ static BOOL configured = FALSE;
 			//_audioSessionCategory = kAudioSessionCategory_PlayAndRecord;
 			_audioSessionCategory = AVAudioSessionCategoryPlayAndRecord;
 			willPlayBackgroundMusic = YES;
+            willPlayVoice = YES;
 			break;
 			
 		default:
@@ -367,11 +372,13 @@ static BOOL configured = FALSE;
 				//_audioSessionCategory = kAudioSessionCategory_AmbientSound;
 				_audioSessionCategory = AVAudioSessionCategoryAmbient;
 				willPlayBackgroundMusic = NO;
+                willPlayVoice = NO;
 			} else {
 				CDLOGINFO(@"Denshion::CDAudioManager - Other audio is not playing audio will be exclusive");
 				//_audioSessionCategory = kAudioSessionCategory_SoloAmbientSound;
 				_audioSessionCategory = AVAudioSessionCategorySoloAmbient;
 				willPlayBackgroundMusic = YES;
+                willPlayVoice = YES;
 			}	
 			
 			break;
@@ -405,6 +412,11 @@ static BOOL configured = FALSE;
 		backgroundMusicCompletionSelector = nil;
 		_isObservingAppEvents = FALSE;
 		_mute = NO;
+        
+        _muteVoice = NO;
+        _muteEffect = NO;
+        _muteBackgroundMusic = NO;
+        
 		_resigned = NO;
 		_interrupted = NO;
 		enabled_ = YES;
@@ -425,6 +437,9 @@ static BOOL configured = FALSE;
 		//Used to support legacy APIs
 		backgroundMusic = [self audioSourceForChannel:BACKGROUND_MUSIC_CHANNEL];
 		backgroundMusic.delegate = self;
+        
+        //added by YoungJae Kwon
+        voice = [self audioSourceForChannel:VOICE_CHANNEL];
 		
 		//Add handler for bad al context messages, these are posted by the sound engine.
 		[[NSNotificationCenter defaultCenter] addObserver:self	selector:@selector(badAlContextHandler) name:kCDN_BadAlContext object:nil];
@@ -435,6 +450,11 @@ static BOOL configured = FALSE;
 
 -(void) dealloc {
 	CDLOGINFO(@"Denshion::CDAudioManager - deallocating");
+    
+    //added by YoungJae Kwon
+    if( _currentBGMPath )
+        [_currentBGMPath release];
+    
 	[self stopBackgroundMusic];
 	[soundEngine release];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -509,7 +529,10 @@ static BOOL configured = FALSE;
 		[soundEngine setMute:muteValue];
 		for( CDLongAudioSource *audioSource in audioSourceChannels) {
 			audioSource.mute = muteValue;
-		}	
+		}
+        _muteBackgroundMusic = muteValue;
+        _muteEffect = muteValue;
+        _muteVoice = muteValue;
 	}	
 }
 
@@ -540,9 +563,23 @@ static BOOL configured = FALSE;
 
 -(void) playBackgroundMusic:(NSString*) filePath loop:(BOOL) loop
 {
+    // added by YoungJae Kwon
+    // 현재 재생중일 파일명에 대해 다시 재생 명령이 들어올 경우 무시할것.
+    if (_currentBGMPath == nil)
+        _currentBGMPath = [filePath copy];
+
+    else if ( [_currentBGMPath isEqualToString:filePath] )
+        return;   
+    else
+    {
+        [_currentBGMPath release];
+        _currentBGMPath = [filePath copy];
+    }
+
 	[self.backgroundMusic load:filePath];
 
-	if (!willPlayBackgroundMusic || _mute) {
+//	if (!willPlayBackgroundMusic || _mute) {
+    if (!willPlayBackgroundMusic || _muteBackgroundMusic) {    
 		CDLOGINFO(@"Denshion::CDAudioManager - play bgm aborted because audio is not exclusive or sound is muted");
 		return;
 	}
@@ -567,7 +604,8 @@ static BOOL configured = FALSE;
 
 -(void) resumeBackgroundMusic
 {
-	if (!willPlayBackgroundMusic || _mute) {
+//	if (!willPlayBackgroundMusic || _mute) {
+	if (!willPlayBackgroundMusic || _muteBackgroundMusic) {        
 		CDLOGINFO(@"Denshion::CDAudioManager - resume bgm aborted because audio is not exclusive or sound is muted");
 		return;
 	}
@@ -584,6 +622,92 @@ static BOOL configured = FALSE;
 	backgroundMusicCompletionListener = listener;
 	backgroundMusicCompletionSelector = selector;
 }	
+
+
+// added by YoungJae Kwon
+// Voice channel
+
+
+-(CDLongAudioSource*) voice
+{
+	return voice;
+}	
+
+-(BOOL) isVoicePlaying {
+	return [self.voice isPlaying];
+}
+
+
+//Load background music ready for playing
+-(void) preloadVoice:(NSString*) filePath
+{
+	[self.voice load:filePath];	
+}	
+
+-(void) playVoice:(NSString*) filePath
+{
+	[self.voice load:filePath];
+    
+//	if (!willPlayVoice || _mute) {
+	if (!willPlayVoice || _muteVoice) {        
+		CDLOGINFO(@"Denshion::CDAudioManager - play bgm aborted because audio is not exclusive or sound is muted");
+		return;
+	}
+    
+    [self.voice setNumberOfLoops:0];
+	[self.voice play];
+}
+
+-(void) stopVoice
+{
+	[self.voice stop];
+}
+
+-(void) pauseVoice
+{
+	[self.voice pause];
+}	
+
+-(void) resumeVoice
+{
+//	if (!willPlayVoice || _mute) {
+    if (!willPlayVoice || _muteVoice) {
+		CDLOGINFO(@"Denshion::CDAudioManager - resume bgm aborted because audio is not exclusive or sound is muted");
+		return;
+	}
+	
+	[self.voice resume];
+}	
+
+-(void) rewindVoice
+{
+	[self.voice rewind];
+}	
+
+-(void) setBackgroundMusicMute:(BOOL) muteValue
+{
+	if (muteValue != _muteBackgroundMusic) {
+        _muteBackgroundMusic = muteValue;
+        backgroundMusic.mute = muteValue;
+    }
+}
+
+-(void) setVoiceMute:(BOOL) muteValue
+{
+	if (muteValue != _muteVoice) {
+        _muteVoice = muteValue;
+        voice.mute = muteValue;
+    }
+}
+
+-(void) setEffectMute:(BOOL) muteValue
+{
+	if (muteValue != _muteEffect) {
+        _muteEffect = muteValue;
+        [soundEngine setMute:muteValue];
+    }
+}
+
 
 /*
  * Call this method to have the audio manager automatically handle application resign and

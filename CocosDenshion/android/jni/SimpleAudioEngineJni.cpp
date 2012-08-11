@@ -1,17 +1,205 @@
-#include <JniHelper.h>
+// #include <JniHelper.h>
 #include "SimpleAudioEngineJni.h"
 #include <android/log.h>
+#include <string>
 
 #define  LOG_TAG    "libSimpleAudioEngine"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define  CLASS_NAME "org/cocos2dx/lib/Cocos2dxActivity"
 
+
+#define JAVAVM	jvm
+
+using namespace std;
 typedef struct JniMethodInfo_
+{
+	JNIEnv *    env;
+	jclass      classID;
+	jmethodID   methodID;
+} JniMethodInfo;
+
+static JavaVM *jvm = 0;
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+	jvm = vm;
+
+	return JNI_VERSION_1_4;
+}
+
+extern "C"
+{
+static bool getEnv(JNIEnv **env);
+static jclass getClassID_(const char *className, JNIEnv *env)
+{
+	JNIEnv *pEnv = env;
+	jclass ret = 0;
+
+	do 
 	{
-		JNIEnv *    env;
-		jclass      classID;
-		jmethodID   methodID;
-	} JniMethodInfo;
+		if (! pEnv)
+		{
+			if (! getEnv(&pEnv))
+			{
+				break;
+			}
+		}
+		
+		ret = pEnv->FindClass(className);
+		if (! ret)
+		{
+			 LOGD("Failed to find class of %s", className);
+			break;
+		}
+	} while (0);
+
+	return ret;
+}
+
+static bool getStaticMethodInfo_(JniMethodInfo &methodinfo, const char *className, const char *methodName, const char *paramCode)
+{
+	jmethodID methodID = 0;
+	JNIEnv *pEnv = 0;
+	bool bRet = false;
+
+    do 
+    {
+		if (! getEnv(&pEnv))
+		{
+			break;
+		}
+
+        jclass classID = getClassID_(className, pEnv);
+
+        methodID = pEnv->GetStaticMethodID(classID, methodName, paramCode);
+        if (! methodID)
+        {
+            LOGD("Failed to find static method id of %s", methodName);
+            break;
+        }
+
+		methodinfo.classID = classID;
+		methodinfo.env = pEnv;
+		methodinfo.methodID = methodID;
+
+		bRet = true;
+    } while (0);
+
+    return bRet;
+}
+
+static bool getMethodInfo_(JniMethodInfo &methodinfo, const char *className, const char *methodName, const char *paramCode)
+{
+	jmethodID methodID = 0;
+	JNIEnv *pEnv = 0;
+	bool bRet = false;
+
+	do 
+	{
+		if (! getEnv(&pEnv))
+		{
+			break;
+		}
+
+		jclass classID = getClassID_(className, pEnv);
+
+		methodID = pEnv->GetMethodID(classID, methodName, paramCode);
+		if (! methodID)
+		{
+			LOGD("Failed to find method id of %s", methodName);
+			break;
+		}
+
+		methodinfo.classID = classID;
+		methodinfo.env = pEnv;
+		methodinfo.methodID = methodID;
+
+		bRet = true;
+	} while (0);
+
+	return bRet;
+}
+
+static string jstring2string_(jstring jstr)
+{
+	JNIEnv *env = 0;
+
+	jboolean isCopy;
+	if (! getEnv(&env))
+	{
+		return 0;
+	}
+
+	const char* chars = env->GetStringUTFChars(jstr, &isCopy);
+	string ret(chars);
+	if (isCopy)
+	{
+		env->ReleaseStringUTFChars(jstr, chars);
+	}
+
+	return ret;
+}
+}
+
+class  JniHelperDenshion
+{
+public:
+
+	static jclass getClassID(const char *className, JNIEnv *env)
+	{
+		return getClassID_(className, env);
+	}
+
+	static bool getStaticMethodInfo(JniMethodInfo &methodinfo, const char *className, const char *methodName, const char *paramCode)
+	{
+		return getStaticMethodInfo_(methodinfo, className, methodName, paramCode);
+	}
+
+	static bool getMethodInfo(JniMethodInfo &methodinfo, const char *className, const char *methodName, const char *paramCode)
+	{
+		return getMethodInfo_(methodinfo, className, methodName, paramCode);
+	}
+
+	static string jstring2string(jstring str)
+	{
+		return jstring2string_(str);
+	}
+
+};
+
+
+
+extern "C"
+{
+
+    //////////////////////////////////////////////////////////////////////////
+    // java vm helper function
+    //////////////////////////////////////////////////////////////////////////
+
+	static bool getEnv(JNIEnv **env)
+	{
+		bool bRet = false;
+
+		do 
+		{
+			if (JAVAVM->GetEnv((void**)env, JNI_VERSION_1_4) != JNI_OK)
+			{
+				LOGD("Failed to get the environment using GetEnv()");
+				break;
+			}
+
+			if (JAVAVM->AttachCurrentThread(env, 0) < 0)
+			{
+				LOGD("Failed to get the environment using AttachCurrentThread()");
+				break;
+			}
+
+			bRet = true;
+		} while (0);		
+
+		return bRet;
+	}
+
+}
 
 
 extern "C"
@@ -19,8 +207,6 @@ extern "C"
 	// get env and cache it
 	static JNIEnv* getJNIEnv(void)
 	{
-
-		JavaVM* jvm = cocos2d::JniHelper::getJavaVM();
         if (NULL == jvm) {
             LOGD("Failed to get JNIEnv. JniHelper::getJavaVM() is NULL");
             return NULL;
@@ -439,4 +625,102 @@ extern "C"
 		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
 		methodInfo.env->DeleteLocalRef(methodInfo.classID);
 	}
+	
+	
+	
+	// Added by YoungJae Kwon
+		// ---- voice channel added----
+	void playVoiceJNI(const char *path)
+	{
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "playVoice", "(Ljava/lang/String;)V"))
+		{
+			return;
+		}
+
+		jstring stringArg = methodInfo.env->NewStringUTF(path);
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, stringArg);
+		methodInfo.env->DeleteLocalRef(stringArg);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+
+	void stopVoiceJNI()
+	{
+		// void stopVoice()
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "stopVoice", "()V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+
+	void pauseVoiceJNI()
+	{
+		// void pauseVoice()
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "pauseVoice", "()V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+
+	void resumeVoiceJNI()
+	{
+		// void resumeVoice()
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "resumeVoice", "()V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	void setVoiceMuteJNI(bool isMute)
+	{
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "setVoiceMute", "(Z)V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, isMute);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	void setEffectMuteJNI(bool isMute)
+	{
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "setEffectMute", "(Z)V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, isMute);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	void setBGMMuteJNI(bool isMute)
+	{
+		JniMethodInfo methodInfo;
+
+		if (! getStaticMethodInfo(methodInfo, "setBGMMute", "(Z)V"))
+		{
+			return;
+		}
+
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, isMute);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	
 }

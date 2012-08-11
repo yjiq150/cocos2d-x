@@ -137,6 +137,43 @@ static void static_stopAllEffects()
     [[SimpleAudioEngine sharedEngine] stopAllEffects];
 }
 
+// Added by YoungJae Kwon
+//------------------------------------voice channel added----------------
+
+static void static_playVoice(const char* pszFilePath)
+{
+    [[SimpleAudioEngine sharedEngine] playVoice:[NSString stringWithUTF8String: pszFilePath]];
+}
+
+static void static_stopVoice()
+{
+	[[SimpleAudioEngine sharedEngine] stopVoice];
+}
+
+static void static_pauseVoice()
+{
+	[[SimpleAudioEngine sharedEngine] pauseVoice];
+}
+
+static void static_resumeVoice()
+{
+	[[SimpleAudioEngine sharedEngine] resumeVoice];
+} 
+
+static void static_setVoiceMute(bool isMute)
+{
+    [[SimpleAudioEngine sharedEngine] setVoiceMute:(BOOL)isMute];
+}
+static void static_setEffectMute(bool isMute)
+{
+    [[SimpleAudioEngine sharedEngine] setEffectMute:(BOOL)isMute];
+}
+static void static_setBGMMute(bool isMute)
+{
+    [[SimpleAudioEngine sharedEngine] setBackgroundMusicMute:(BOOL)isMute];
+}
+
+
 namespace CocosDenshion
 {
 	static SimpleAudioEngine *s_pEngine;
@@ -280,5 +317,39 @@ namespace CocosDenshion
 	void SimpleAudioEngine::stopAllEffects()
 	{
 	    static_stopAllEffects();
+	}
+    
+    // Added by YoungJae Kwon
+	// ------- Voice channel added-------------
+	void SimpleAudioEngine::playVoice(const char* pszFilePath)
+	{
+		static_playVoice(pszFilePath);
+	}
+	
+	void SimpleAudioEngine::stopVoice(bool bReleaseData)
+	{
+		static_stopVoice();
+	}
+	
+	void SimpleAudioEngine::pauseVoice()
+	{
+		static_pauseVoice();
+	}
+	
+	void SimpleAudioEngine::resumeVoice()
+	{
+		static_resumeVoice();
+	} 
+	void SimpleAudioEngine::setVoiceMute(bool isMute)
+	{
+		static_setVoiceMute(isMute);
+	}
+	void SimpleAudioEngine::setEffectMute(bool isMute)
+	{
+		static_setEffectMute(isMute);
+	}
+	void SimpleAudioEngine::setBGMMute(bool isMute)
+	{
+		static_setBGMMute(isMute);
 	}
 }

@@ -5,7 +5,7 @@
 
 extern "C"
 {
-    extern void preloadBackgroundMusicJNI(const char *path);
+ extern void preloadBackgroundMusicJNI(const char *path);
     extern void playBackgroundMusicJNI(const char *path, bool isLoop);
 	extern void stopBackgroundMusicJNI();
 	extern void pauseBackgroundMusicJNI();
@@ -26,6 +26,17 @@ extern "C"
 	extern void resumeEffectJNI(unsigned int nSoundId);
 	extern void resumeAllEffectsJNI();
 	extern void stopAllEffectsJNI();
+	
+	// Added by YoungJae Kwon
+	// ---- voice channel added---
+	extern void playVoiceJNI(const char* path);
+	extern void stopVoiceJNI();
+	extern void pauseVoiceJNI();
+	extern void resumeVoiceJNI();
+	// Mute added
+	extern void setVoiceMuteJNI(bool isMute);
+	extern void setEffectMuteJNI(bool isMute);
+	extern void setBGMMuteJNI(bool isMute);
 }
 
 #endif // __SIMPLE_AUDIO_ENGINE_JNI__

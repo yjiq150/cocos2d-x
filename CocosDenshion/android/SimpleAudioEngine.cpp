@@ -163,4 +163,38 @@ namespace CocosDenshion
 	{
 		stopAllEffectsJNI();
 	}
+
+	// Added by YoungJae Kwon
+	// ------- Voice channel added-------------
+	void SimpleAudioEngine::playVoice(const char* pszFilePath)
+	{
+		playVoiceJNI(pszFilePath);
+	}
+
+	void SimpleAudioEngine::stopVoice(bool bReleaseData)
+	{
+		stopVoiceJNI();
+	}
+
+	void SimpleAudioEngine::pauseVoice()
+	{
+		pauseVoiceJNI();
+	}
+
+	void SimpleAudioEngine::resumeVoice()
+	{
+		resumeVoiceJNI();
+	}
+	void SimpleAudioEngine::setVoiceMute(bool isMute)
+	{
+		setVoiceMuteJNI(isMute);
+	}
+	void SimpleAudioEngine::setEffectMute(bool isMute)
+	{
+		setEffectMuteJNI(isMute);
+	}
+	void SimpleAudioEngine::setBGMMute(bool isMute)
+	{
+		setBGMMuteJNI(isMute);
+	}
 }
