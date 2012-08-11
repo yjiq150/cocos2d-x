@@ -73,6 +73,7 @@ class CC_DLL CCTextureCache : public CCObject
 {
 protected:
 	CCMutableDictionary<std::string, CCTexture2D*> * m_pTextures;
+    
 	//pthread_mutex_t				*m_pDictLock;
 
 		//added by YoungJae Kwon
@@ -192,15 +193,27 @@ public:
     It's only useful when the value of CC_ENABLE_CACHE_TEXTTURE_DATA is 1
     */
     static void reloadAllTextures();
+
 	//added by YoungJae Kwon
+    // called when app is back to foreground
 	void rebindRenderTextures();
-	void saveRegisteredRenderTexturesToFile();
-	void saveRegisteredRenderTexturesToVolatileTextureCache();
+    // called when app goes to background
+	void addRegisteredRenderTexturesToVolatileTexture();
+    
 	void registerRenderTexture(CCRenderTexture* renderTexture);
 	void unregisterRenderTexture(CCRenderTexture* renderTexture);
-		
+	
+    //Deprecated:
+    void saveRegisteredRenderTexturesToFile();
+    
 	protected:
 		 CCMutableDictionary<std::string, CCRenderTexture*> * m_pRenderTextures;
+    
+    // added by YoungJae Kwon :CCImageCache
+#if CC_ENABLE_CACHE_TEXTTURE_DATA
+    std::map<std::string, CCImage*> mCCImages;
+#endif
+    
 };
 
 #if CC_ENABLE_CACHE_TEXTTURE_DATA
@@ -212,6 +225,7 @@ typedef enum {
 	kImageFile,
 	kImageData,
 	kString,
+    kCCImage // added by YoungJae Kwon :CCImageCache
 }ccCachedImageType;
 
 public:
@@ -222,6 +236,9 @@ public:
     static void addStringTexture(CCTexture2D *tt, const char* text, const CCSize& dimensions, CCTextAlignment alignment, const char *fontName, float fontSize);
 	static void addDataTexture(CCTexture2D *tt, void* data, CCTexture2DPixelFormat pixelFormat, const CCSize& contentSize);
 
+    // added by YoungJae Kwon : CCImageCache
+    static void addCCImageTexture(CCTexture2D *tt, CCImage* aImage);
+    
     static void removeTexture(CCTexture2D *t);
     static void reloadAllTextures();
 

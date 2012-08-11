@@ -146,7 +146,7 @@ string CCFileUtils::getWriteablePath()
 	string dir("/data/data/");
 	const char *tmp = getPackageNameJNI();
 
-	CCLog("myPackName:%s",tmp);
+//	CCLog("myPackName:%s",tmp);
 	if (tmp)
 	{
 		//Both of them having garbage character added Bug
@@ -156,7 +156,7 @@ string CCFileUtils::getWriteablePath()
 		char buf[200];
 		sprintf(buf,"/data/data/%s/",tmp);
 		dir = buf;
-		CCLog("getWritablePath:%s",dir.c_str());
+//		CCLog("getWritablePath:%s",dir.c_str());
 		// release memory
 		//delete [] tmp;
 

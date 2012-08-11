@@ -145,14 +145,13 @@ static void static_addItemToCCArray(id item, CCObject* pArray, bool isUsingCCNum
         NSString* pStr = [item stringValue];
         if( !isUsingCCNumber )
         {
-        CCString* pValue = new CCString([pStr UTF8String]);
-        
+            CCString* pValue = new CCString([pStr UTF8String]);
             ((CCMutableArray<>*)pArray)->addObject(pValue);
-        pValue->release();
+            pValue->release();
         }
         else
         {
-            CCLog("array_type:%s",[item objCType]);
+//            CCLog("array_type:%s",[item objCType]);
             if( strcmp([item objCType], @encode(int)) == 0 ||
                strcmp([item objCType], @encode(long)) == 0 ||
                strcmp([item objCType], @encode(unsigned int)) == 0 ||
@@ -200,25 +199,24 @@ static void static_addItemToCCArray(id item, CCObject* pArray, bool isUsingCCNum
     if ([item isKindOfClass:[NSArray class]]) {
         if(!isUsingCCNumber)
         {
-            
-        CCMutableArray<CCObject*> *pArrayItem = new CCMutableArray<CCObject*>();
-        for (id subItem in item) {
-                static_addItemToCCArray(subItem, pArrayItem, isUsingCCNumber);
-        }
+            CCMutableArray<CCObject*> *pArrayItem = new CCMutableArray<CCObject*>();
+            for (id subItem in item) {
+                    static_addItemToCCArray(subItem, pArrayItem, isUsingCCNumber);
+            }
             ((CCMutableArray<>*)pArray)->addObject(pArrayItem);
-        pArrayItem->release();
+            pArrayItem->release();
         }
         else
         {
 
             CCArray *pArrayItem = CCArray::array();
-            CCLog("adding item to array %p",pArrayItem);            
+//            CCLog("adding item to array %p",pArrayItem);            
             for (id subItem in item) {
                 
                 static_addItemToCCArray(subItem, pArrayItem, isUsingCCNumber);
             }
             ((CCArray*)pArray)->addObject(pArrayItem);
-            CCLog("to array %p added complete",pArrayItem);
+//            CCLog("to array %p added complete",pArrayItem);
         }
         return;
     }
@@ -256,14 +254,14 @@ static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, 
         NSString* pStr = [value stringValue];
         if( !isUsingCCNumber )
         {
-        CCString* pValue = new CCString([pStr UTF8String]);
-        
-        pDict->setObject(pValue, pKey);
-        pValue->release();
+            CCString* pValue = new CCString([pStr UTF8String]);
+            
+            pDict->setObject(pValue, pKey);
+            pValue->release();
         }
         else
         {
-            CCLog("dic_type:%s",[value objCType]);
+//            CCLog("dic_type:%s",[value objCType]);
             if( strcmp([value objCType], @encode(int)) == 0 ||
                strcmp([value objCType], @encode(long)) == 0 ||
                strcmp([value objCType], @encode(unsigned int)) == 0 ||
@@ -271,19 +269,19 @@ static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, 
                strcmp([value objCType], @encode(long long)) == 0 ||
               strcmp([value objCType], @encode(unsigned long long)) == 0 )
             {
-                CCLog("added int:%d",[value intValue]);
+//                CCLog("added int:%d",[value intValue]);
                 pDict->setObject( CCNumber<int>::numberWithValue([value intValue]), pKey);
             }
             else if( strcmp([value objCType], @encode(float)) == 0 || 
                     strcmp([value objCType], @encode(double)) == 0 )
             {
-                CCLog("added float:%f",[value floatValue]);
-                pDict->setObject( CCNumber<float>::numberWithValue([value floatValue]), pKey);                
+//                CCLog("added float:%f",[value floatValue]);
+                pDict->setObject( CCNumber<float>::numberWithValue([value floatValue]), pKey);
             }
             else if( strcmp([value objCType], @encode(bool)) == 0 )
             {
-                CCLog("added bool:%d",[value boolValue]);                
-                pDict->setObject( CCNumber<bool>::numberWithValue([value boolValue]), pKey);                                
+//                CCLog("added bool:%d",[value boolValue]);                
+                pDict->setObject( CCNumber<bool>::numberWithValue([value boolValue]), pKey);
             }
             else {
                 CCAssert(0, "static_addValueToCCDict::Unknown value type paring");
@@ -299,12 +297,12 @@ static void static_addValueToCCDict(id key, id value, CCDictionary<std::string, 
     if ([value isKindOfClass:[NSArray class]]) {
         if( !isUsingCCNumber )
         {
-        CCMutableArray<CCObject*> *pArray = new CCMutableArray<CCObject*>();
-        for (id item in value) {
-                static_addItemToCCArray(item, pArray, isUsingCCNumber);
-        }
-        pDict->setObject(pArray, pKey);
-        pArray->release();
+            CCMutableArray<CCObject*> *pArray = new CCMutableArray<CCObject*>();
+            for (id item in value) {
+                    static_addItemToCCArray(item, pArray, isUsingCCNumber);
+            }
+            pDict->setObject(pArray, pKey);
+            pArray->release();
         }
         else
         {

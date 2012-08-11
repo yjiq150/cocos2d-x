@@ -996,16 +996,15 @@ void CCSprite::updateOpacityBasedOnParents(void)
 
 void CCSprite::updateColor(void)
 {
-
-    /*
-     //MOD: added by youngJae Kwon
-	if (m_bOpacityModifyRGB)
-	{
-		m_sColor.r = m_sColorUnmodified.r * m_nOpacity/255;
-		m_sColor.g = m_sColorUnmodified.g * m_nOpacity/255;
-		m_sColor.b = m_sColorUnmodified.b * m_nOpacity/255;
-	}
-	
+	/*
+    //MOD: added by youngJae Kwon
+    if (m_bOpacityModifyRGB)
+    {
+        m_sColor.r = m_sColorUnmodified.r * m_nOpacity/255;
+        m_sColor.g = m_sColorUnmodified.g * m_nOpacity/255;
+        m_sColor.b = m_sColorUnmodified.b * m_nOpacity/255;
+    }
+     
 	GLubyte opacityForDrawing;
 	float alpha = 1.0f;
 	CCNode* parentNode = this->getParent();

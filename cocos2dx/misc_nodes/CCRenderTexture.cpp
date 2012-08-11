@@ -46,6 +46,7 @@ CCRenderTexture::CCRenderTexture()
 , m_pUITextureImage(NULL)
 , m_ePixelFormat(kCCTexture2DPixelFormat_RGBA8888)
 {
+    m_nBeginCount = 0;
 }
 
 CCRenderTexture::~CCRenderTexture()
@@ -202,6 +203,11 @@ void CCRenderTexture::reloadAfterWakeup()
 	
 void CCRenderTexture::begin()
 {
+    // added by YoungJae Kwon    
+    m_nBeginCount++;
+    if( m_nBeginCount > 1 )
+        return;
+    
 	// Save the current matrix
 	glPushMatrix();
 
@@ -253,33 +259,50 @@ void CCRenderTexture::beginWithClear(float r, float g, float b, float a)
 	{
 		if (bIsTOCasheTexture)
 		{
-		CC_SAFE_DELETE(m_pUITextureImage);
+            CC_SAFE_DELETE(m_pUITextureImage);
 
-		// to get the rendered texture data
-		const CCSize& s = m_pTexture->getContentSizeInPixels();
-		int tx = (int)s.width;
-		int ty = (int)s.height;
-		m_pUITextureImage = new CCImage;
-		if (true == getUIImageFromBuffer(m_pUITextureImage, 0, 0, tx, ty))
-		{
-			VolatileTexture::addDataTexture(m_pTexture, m_pUITextureImage->getData(), kTexture2DPixelFormat_RGBA8888, s);
-		} 
-		else
-		{
-			CCLOG("Cache rendertexture failed!");
-		}
-	}
+            // to get the rendered texture data
+            const CCSize& s = m_pTexture->getContentSizeInPixels();
+            int tx = (int)s.width;
+            int ty = (int)s.height;
+            m_pUITextureImage = new CCImage(); // 여기서 생성된 CCImage는 연결된 렌더텍스쳐가 파괴될때 같이 해제
+//            if (true == getUIImageFromBuffer(m_pUITextureImage, 0, 0, tx, ty))
+//            {
+//                VolatileTexture::addDataTexture(m_pTexture, m_pUITextureImage->getData(), kTexture2DPixelFormat_RGBA8888, s);
+//            }
+            // added by YoungJae Kwon
+            if( getUIImageFromBufferUpsideDown(m_pUITextureImage, 0, 0, tx, ty) )
+            {
+                //addDataTexture에 뒤집힌 CCImage객체를 통째로 보낸다.(버그수정)
+                VolatileTexture::addDataTexture(m_pTexture, m_pUITextureImage, kTexture2DPixelFormat_RGBA8888, s);
+            }
+            else
+            {
+                CCLOG("Cache rendertexture failed!");
+            }
+        }
 
+        // added by YoungJae Kwon
+        m_nBeginCount--;
+        if (m_nBeginCount > 0)
+            return;
+        
 		ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
 		// Restore the original matrix and viewport
 		glPopMatrix();
 		CCSize size = CCDirector::sharedDirector()->getDisplaySizeInPixels();
 		//	glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
 		CCDirector::sharedDirector()->getOpenGLView()->setViewPortInPoints(0, 0, size.width, size.height);
+
 	}
 #else
-	void CCRenderTexture::end()
+	void CCRenderTexture::end(bool bIsTOCasheTexture)
 	{
+        // added by YoungJae Kwon
+        m_nBeginCount--;
+        if (m_nBeginCount > 0)
+            return;
+        
 		ccglBindFramebuffer(CC_GL_FRAMEBUFFER, m_nOldFBO);
 		// Restore the original matrix and viewport
 		glPopMatrix();
@@ -396,11 +419,7 @@ bool CCRenderTexture::getUIImageFromBuffer(CCImage *pImage, int x, int y, int nW
 		this->begin();
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(0,0,nReadBufferWidth,nReadBufferHeight,GL_RGBA,GL_UNSIGNED_BYTE, pTempData);
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    	this->end();    
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 		this->end(false);
-#endif        
 
 		// to get the actual texture data 
 		// #640 the image read from rendertexture is upseted
@@ -569,15 +588,11 @@ CCRawImageData * CCRenderTexture::getRawImageFromBuffer(int format,CCRect cropFr
 	}
 	
 	
-	CCRawImageData* data = CCRawImageData::dataWithBytesNoCopy(pPixels,myDataLength);
-	
+	CCRawImageData* data = CCRawImageData::dataWithBytesNoCopy(pPixels,myDataLength);	
 	data->setInfo(cropFrame.size);
 
-    
-	// πˆ∆€¥¬ «ÿ¡¶
-     CC_SAFE_DELETE_ARRAY(pBuffer);
-	// NO COPY¿Ãπ«∑Œ «ÿ¡¶«œ∏È æ»µ . ≥™¡ﬂø° CCRawImageData∞° ø¿≈‰∏±∏Æ¡Ó µ…∂ß ¿⁄µø¿∏∑Œ pPixelµµ «ÿ¡¶
-     //CC_SAFE_DELETE_ARRAY(pPixels);
+    CC_SAFE_DELETE_ARRAY(pBuffer);
+
 	return data;
 	
 }

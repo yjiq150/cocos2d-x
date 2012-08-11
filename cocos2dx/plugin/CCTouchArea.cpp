@@ -62,7 +62,7 @@ void CCTouchArea::draw()
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
-	//Added by 권영재 터치 오브젝트 앵커값에따라 평행이동
+	//Added by YoungJae Kwon 터치 오브젝트 앵커값에따라 평행이동
 	// 앵커포인트는 포인트계산, 이미지는 픽셀계산(레티나 디스플레이 고려해서 평행이동)
 	glTranslatef(-m_tAnchorPoint.x * m_tContentSizeInPixels.width, -m_tAnchorPoint.y * m_tContentSizeInPixels.height, 0.0f);
 	

@@ -86,7 +86,7 @@ public:
 	void end(bool bIsTOCasheTexture = true);
 #else
 	/** ends grabbing*/
-	void end();
+	void end(bool bIsTOCasheTexture = false);
 #endif
 
     /** clears the texture with a color */
@@ -134,6 +134,10 @@ protected:
 	CCTexture2D			*m_pTexture;
 	CCImage				*m_pUITextureImage;
     GLenum				m_ePixelFormat;
+    
+    // added by YoungJae Kwon
+    // perform begin / end only once. GalaxyNote 10.1 bug
+    int                m_nBeginCount;
 };
 
 } // namespace cocos2d
