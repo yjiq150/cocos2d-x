@@ -112,17 +112,17 @@ CCApplication& CCApplication::sharedApplication()
 //added by YoungJae Kwon
 const char* CCApplication::getCurrentLanguageCode()
 {
-    /*
+    
     // this return 'ko'
     // get the current language and country config
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSArray *languages = [defaults objectForKey:@"AppleLanguages"];
-    NSString *currentLanguage = [languages objectAtIndex:0];
-    
-    // get the current language code.(such as English is "en", Chinese is "zh" and so on)
-    NSDictionary* temp = [NSLocale componentsFromLocaleIdentifier:currentLanguage];
-    NSString * languageCode = [temp objectForKey:NSLocaleLanguageCode];
-    */
+//    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+//    NSArray *languages = [defaults objectForKey:@"AppleLanguages"];
+//    NSString *currentLanguage = [languages objectAtIndex:0];
+//    
+//    // get the current language code.(such as English is "en", Chinese is "zh" and so on)
+//    NSDictionary* temp = [NSLocale componentsFromLocaleIdentifier:currentLanguage];
+//    NSString * languageCode = [temp objectForKey:NSLocaleLanguageCode];
+//    
     
     // this return 'kr'
     NSString * languageCode = [[NSLocale preferredLanguages] objectAtIndex:0];

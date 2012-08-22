@@ -28,6 +28,9 @@ THE SOFTWARE.
 #include "CCObject.h"
 #include "CCFileUtils.h"
 
+#define ccs(val) CCString::makeString(val)
+
+
 namespace cocos2d {
 
 	class CC_DLL CCString : public CCObject
@@ -73,6 +76,12 @@ namespace cocos2d {
 		std::string toStdString()
 		{
 			return m_sString;
+		}
+        
+        // added by YoungJae Kwon
+        const char* toCString()
+		{
+			return m_sString.c_str();
 		}
 
 		bool isEmpty()

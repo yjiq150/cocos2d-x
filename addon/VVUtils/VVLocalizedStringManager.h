@@ -15,6 +15,10 @@
 #define VVLocalizedString(key, comment) \
     VVLocalizedStringManager::shared()->getStringForKey(key).c_str()
 
+#define VVLocalizedFontName() \
+VVLocalizedStringManager::shared()->getLocalizedFontName().c_str()
+
+
 #define VVLocalizedStringMake(formattedStr) \
     VVLocalizedStringManager::shared()->makeLocalized(formattedStr).c_str()
 
@@ -27,16 +31,18 @@ public:
     VVLocalizedStringManager();
 
     void initialize();
-    void addLanguageSupport(string langCode);    
+    void addLanguageSupport(string langCode);
+    void addFontNameForLanguage(string langCode, string aFontName);
     string makeLocalized(const char* formattedStr);
     string getStringForKey(const char* aKey);
-    
+    string getLocalizedFontName();
 
 
     
     
 protected:
     map<string, bool> supportLanguages;
+    map<string, string> fontNames;
     Json::Value m_jsonObj;
     string currentLangCode;
 

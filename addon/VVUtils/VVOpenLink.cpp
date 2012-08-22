@@ -7,8 +7,12 @@
  *
  */
 
+
 #include "VVOpenLink.h"
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+#import <UIKit/UIKit.h>
+#endif
 void VVOpenLink::openAppLinkWithAppID(char* appid)
 {
     CCAssert(appid, "appid is NULL");

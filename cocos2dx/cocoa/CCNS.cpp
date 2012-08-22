@@ -138,7 +138,7 @@ namespace cocos2d
             float y = (float) atof(pointInfo[1].c_str());
             float width  = (float) atof(sizeInfo[0].c_str());
             float height = (float) atof(sizeInfo[1].c_str());
-
+            
             result = CCRectMake(x, y, width, height);
         } while (0);
 

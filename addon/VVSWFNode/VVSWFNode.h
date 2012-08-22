@@ -3,7 +3,7 @@
  *  Cocos2d_X_BasicTest
  *
  *  Created by YoungJae Kwon on 12. 4. 2.
- *  Copyright 2011  Viscuit Creative Inc. All rights reserved.
+ *  Copyright 2011  Beyondi Inc. All rights reserved.
  *
  */
 

@@ -49,7 +49,10 @@ void VVLocalizedStringManager::addLanguageSupport(string langCode)
 {
     supportLanguages[langCode] = true;
 }
-
+void VVLocalizedStringManager::addFontNameForLanguage(string langCode, string aFontName)
+{
+    fontNames[langCode] = aFontName;
+}
 
 // maked localized string on given format
 string VVLocalizedStringManager::makeLocalized(const char* formattedStr)
@@ -72,6 +75,14 @@ string VVLocalizedStringManager::getStringForKey(const char* aKey)
     return m_jsonObj[aKey].asString();
 }
 
+string VVLocalizedStringManager::getLocalizedFontName()
+{
+    
+    if (fontNames.find(currentLangCode) == fontNames.end())
+        return "";
+    else
+        return fontNames[currentLangCode];
+}
 
 void VVLocalizedStringManager::loadLocalizedStringFile()
 {

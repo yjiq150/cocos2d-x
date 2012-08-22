@@ -3,7 +3,7 @@
 //  Cocos2dxTemplate
 //
 //  Created by YoungJae Kwon on 12. 4. 11..
-//  Copyright (c) 2012년 Viscuit Creative Inc. All rights reserved.
+//  Copyright (c) 2012년 Beyondi Inc. All rights reserved.
 //
 
 #include "VVSWFCache.h"
