@@ -56,13 +56,15 @@ void VVMultiScreenManager::calculateWinSize(CCSize aOriginalSize, CCSize aTarget
         orientation = VVOrientationLandscape;
     else
         orientation = VVOrientationPortrait;
-
+#ifdef COCOS2D_DEBUG
     CCLog("----------Calculate MultiscreenManager---------");
     VVLog("original:",aOriginalSize);
     VVLog("target:",aTargetSize);
     CCLog("scale x:%f, y:%f",scaleFactorX,scaleFactorY);
     VVLog("offset:",offset);
     CCLog("-----------------------------------------------");
+#endif
+    
 }
 
 // 오리지널 구성된 화면의 윈도우 크기를 리턴

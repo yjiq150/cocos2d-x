@@ -802,10 +802,19 @@ void VVScrollView::ccTouchesMoved(CCSet* touches, CCEvent* event)
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS )
 				touchMoved = true;			
 #elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID )	
-			if (touchLocation.x == initialTouchLocation.x && touchLocation.y == initialTouchLocation.y) 
+            float maxMoveSensitivity = 5;
+			if (touchLocation.x == initialTouchLocation.x && touchLocation.y == initialTouchLocation.y)
 				touchMoved = false;
+            else if(touchLocation.x <= initialTouchLocation.x + maxMoveSensitivity &&
+                    touchLocation.x >= initialTouchLocation.x - maxMoveSensitivity &&
+                    touchLocation.y <= initialTouchLocation.y + maxMoveSensitivity &&
+                    touchLocation.y >= initialTouchLocation.y - maxMoveSensitivity)
+            {
+                touchMoved = false;
+            }
 			else
-				touchMoved = true;		
+				touchMoved = true;
+            
 #endif
 			
 			CCPoint moveDistance, newPoint, maxInset, minInset;
