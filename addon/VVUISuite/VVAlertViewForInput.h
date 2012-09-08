@@ -34,7 +34,7 @@ public:
     string getText();
     
 protected:
-    VVTextField* txtField;
+    CC_SYNTHESIZE(VVTextField*, txtField, TextField);
 
     void onBtnCancel(CCObject* sender);
     void onBtnOk(CCObject* sender);

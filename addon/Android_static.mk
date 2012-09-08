@@ -27,6 +27,8 @@ VVUtils/VVLog.cpp \
 \
 CCMenuItemDynamic/CCMenuItemDynamic.cpp \
 CCMenuItemDynamic/CCScale9Sprite.cpp \
+\
+SimpleHttpRequest.cpp \
 
 LOCAL_C_INCLUDES := \
 $(COCOS2DX_PATH)/cocos2dx \

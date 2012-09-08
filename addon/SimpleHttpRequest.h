@@ -12,7 +12,6 @@
 #include "cocos2d.h"
 #include "pthread.h"
 #include "curl/curl.h"
-#include "json/json.h"
 #include <string>
 
 
@@ -20,7 +19,7 @@ class SimpleHttpRequest;
 class SimpleHttpRequestDelegate
 {
 public:
-    virtual void onResponse(bool result,const Json::Value& response,SimpleHttpRequest* request) = 0;
+    virtual void onResponse(bool result, const string& response, SimpleHttpRequest* request) = 0;
 };
 
 
@@ -52,7 +51,7 @@ public:
     void cancel();
     bool cancelled() const { return cancelled_; }
     
-    // start 
+    // start
     bool start();
     
     
@@ -64,19 +63,19 @@ public:
     
     void setPostText(const std::string& text) { post_ = text; }
     const std::string& post() const { return post_; }
-
+    
     
     
     int tag() const { return tag_; }
     void setTag(int tag) { tag_ = tag; }
-protected:    
+protected:
     static size_t writeData(char *data, size_t size, size_t nmemb, SimpleHttpRequest *userdata);
     std::string& buffer() { return buffer_; }
     
-    
+    void requestAsyncCallBack(ccTime dt);
     static void* doRequest(void* param);
 protected:
-    pthread_t thread_; 
+    pthread_t thread_;
     pthread_mutex_t mutex_;
     
     int tag_;
@@ -91,9 +90,12 @@ protected:
     HttpMethod method_;
     
     std::string post_;
-    // 
+    //
     std::string buffer_;
-
+    
+    bool isResponseReady_;
+    bool isRequestErrorOccured_;
+    
 };
 
 

@@ -8,6 +8,8 @@
 
 #include "SimpleHttpRequest.h"
 
+#include "CCThread.h"
+
 using namespace cocos2d;
 
 SimpleHttpRequest* SimpleHttpRequest::simpleHttpRequestWithURL(const std::string &url,
@@ -24,13 +26,16 @@ SimpleHttpRequest* SimpleHttpRequest::simpleHttpRequestWithURL(const std::string
 
 void* SimpleHttpRequest::doRequest(void *param)
 {
+    // create autorelease pool for iOS
+	CCThread thread;
+	thread.createAutoreleasePool();
+    
     SimpleHttpRequest* request = static_cast<SimpleHttpRequest*>(param);
     // retain it
-    request->retain();
     
     char curlErrStr[CURL_ERROR_SIZE];
     
-    bool successed = false;
+    request->isRequestErrorOccured_ = false;
     
     CURL* handle = curl_easy_init();
     if(handle)
@@ -42,17 +47,17 @@ void* SimpleHttpRequest::doRequest(void *param)
         curl_easy_setopt(handle, CURLOPT_URL, request->url().c_str());
         curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, SimpleHttpRequest::writeData);
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, request );
-//        curl_easy_setopt(handle, CURLOPT_ENCODING, "gzip");
+        //        curl_easy_setopt(handle, CURLOPT_ENCODING, "gzip");
         
         HttpMethod method = request->httpMethod();
         if(method == kHttpMethodPost || method == kHttpMethodDelete) {
             curl_easy_setopt(handle, CURLOPT_POSTFIELDS,request->post().c_str());
-
+            
             if(method == kHttpMethodDelete)
-                curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST,"DELETE");    
+                curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST,"DELETE");
         }
         
-               
+        
         CURLcode curlErr = curl_easy_perform(handle);
         
         if(httpHeaders)
@@ -63,29 +68,20 @@ void* SimpleHttpRequest::doRequest(void *param)
         {
             // Write error message to buffer
             std::stringstream ss(std::stringstream::in | std::stringstream::out);
-            ss << "{\"result\":false,\"reason\":" << curlErr <<"}"; 
+            ss << "{\"result\":false,\"reason\":" << curlErr <<"}";
             request->buffer() = ss.str();
+            
+            request->isRequestErrorOccured_ = true;
         }
-        else 
-            successed = true;
-    }
-
-    if(!request->cancelled() && request->delegate_)
-    {
-        // load json
-        Json::Reader reader;
-        Json::Value jsonRoot;
-        if(!reader.parse(request->buffer(), jsonRoot))
-        {
-            CCLOG("Not Json Document:%s",request->buffer().c_str());
-            successed = false;
-        }
-
-//        CCLOG("RESPONSE:%s",request->buffer().c_str());
-        request->delegate_->onResponse(successed, jsonRoot,request);
+        else
+            request->isRequestErrorOccured_ = false;
     }
     
-    request->release();
+    if(!request->cancelled() && request->delegate_)
+    {
+        request->isResponseReady_ = true;
+    }
+    
     pthread_detach(pthread_self());
     return (void*)0;
 }
@@ -97,6 +93,8 @@ SimpleHttpRequest::SimpleHttpRequest(const std::string& url,HttpMethod method,Si
 , url_(url)
 , method_(method)
 , cancelled_(false)
+, isResponseReady_(false)
+, isRequestErrorOccured_(false)
 {
     pthread_mutex_init(&mutex_, NULL);
 }
@@ -121,9 +119,20 @@ size_t SimpleHttpRequest::writeData(char *data, size_t size, size_t nmemb, Simpl
     return bytes;
 }
 
+void SimpleHttpRequest::requestAsyncCallBack(ccTime dt)
+{
+    if( !isResponseReady_)
+        return;
+    
+    delegate_->onResponse( !isRequestErrorOccured_, buffer(), this);
+    
+    CCScheduler::sharedScheduler()->unscheduleSelector(schedule_selector(SimpleHttpRequest::requestAsyncCallBack),this);
+}
 
 bool SimpleHttpRequest::start()
 {
+    CCScheduler::sharedScheduler()->scheduleSelector(schedule_selector(SimpleHttpRequest::requestAsyncCallBack), this, 0, false);
+    
     return (pthread_create(&thread_, NULL, SimpleHttpRequest::doRequest, this) == 0);
 }
 
@@ -139,10 +148,5 @@ void SimpleHttpRequest::cancel()
         pthread_mutex_unlock(&mutex_);
     }
 }
-
-
-
-
-
 
 

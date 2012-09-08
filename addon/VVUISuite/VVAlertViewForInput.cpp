@@ -77,7 +77,7 @@ bool VVAlertViewForInput::initWithTitle(const char* aTitle, const char* aMessage
     txtField->initWithPlaceHolder(aPlaceHolder, fontName.c_str(), param.textFieldFontSize, param.maxFieldLength, param.fieldSize);
     txtField->setPosition(ccp(-param.fieldSize.width/2,centerOfMargin));
     txtField->setDelegate(aTextDelegate);
-    txtField->setIsAcceptingOnlyASCII(true);
+//    txtField->setIsAcceptingOnlyASCII(true);
     
     addChild(txtField);
     txtField->release();

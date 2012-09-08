@@ -289,18 +289,7 @@ void CCTextFieldTTF::setString(const char *text)
 
     if (text)
     {
-        if (isPasswordText) {
-            m_pPasswordActualText = new std::string(text);
-            char buf[128];
-            int i;
-            for (i = 0; i < strlen(text); i++)
-                buf[i] = '*';
-            
-            buf[i] = '\0';
-            m_pInputText = new std::string(buf);
-        }
-        else
-            m_pInputText = new std::string(text);
+        m_pInputText = new std::string(text);
     }
     else
     {
@@ -314,17 +303,25 @@ void CCTextFieldTTF::setString(const char *text)
     }
     else
     {
-        CCLabelTTF::setString(m_pInputText->c_str());
+        // added by YoungJae Kwon
+        if( isPasswordText )
+        {
+            int len = m_pInputText->length();
+            char *asterisk = new char[len]+1;
+            for( int i = 0; i < len; i++ )
+                asterisk[i] = '*';
+            asterisk[len] = '\0';
+            CCLabelTTF::setString(asterisk);
+        }
+        else
+            CCLabelTTF::setString(m_pInputText->c_str());
     }
     m_nCharCount = _calcCharCount(m_pInputText->c_str());
 }
 
 const char* CCTextFieldTTF::getString(void)
 {
-    if( isPasswordText )
-        return m_pPasswordActualText->c_str();
-    else
-        return m_pInputText->c_str();
+    return m_pInputText->c_str();
 }
 
 // place holder text property

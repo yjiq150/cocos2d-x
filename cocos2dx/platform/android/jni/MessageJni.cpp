@@ -203,5 +203,22 @@ extern "C"
 		}
 	}
 
+	// added by YoungJae Kwon
+	void playVideoJNI(const char* url)
+	{
+		JniMethodInfo t;
 
+		if (JniHelper::getStaticMethodInfo(t
+			, "org/cocos2dx/lib/Cocos2dxActivity"
+			, "playVideo"
+			, "(Ljava/lang/String;)V"))
+		{	
+			jstring stringUrl = t.env->NewStringUTF(url);
+			t.env->CallStaticVoidMethod(t.classID, t.methodID, stringUrl);
+
+            t.env->DeleteLocalRef(stringUrl);
+			t.env->DeleteLocalRef(t.classID);
+			
+		}
+	}
 }

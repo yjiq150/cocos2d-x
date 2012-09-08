@@ -130,6 +130,16 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/ \
                     $(LOCAL_PATH)/include \
                     $(LOCAL_PATH)/platform \
 
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/ \
+					\
+					$(LOCAL_PATH)/../addon \
+					$(LOCAL_PATH)/../addon/VVSWFNode \
+					\
+					$(LOCAL_PATH)/cocoa \
+					$(LOCAL_PATH)/plugin \
+                    $(LOCAL_PATH)/include \
+                    $(LOCAL_PATH)/platform \
+
 LOCAL_EXPORT_LDLIBS := -llog\
                        -lz \
                        -lGLESv1_CM
@@ -140,6 +150,7 @@ LOCAL_LDLIBS := \
                  -lpng \
                  -lxml2 \
                  -ljpeg \
+
 
 LOCAL_WHOLE_STATIC_LIBRARIES := cocos_libpng_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos_jpeg_static

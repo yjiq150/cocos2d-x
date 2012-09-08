@@ -319,6 +319,7 @@ bool CCParticleSystem::initWithDictionary(CCDictionary<std::string, CCObject*> *
 			
 			CC_BREAK_IF(!m_pTexture);
 			this->m_pTexture->retain();
+            
 			bRet = true;
 		}
 	} while (0);

@@ -35,6 +35,9 @@ extern "C"
 	extern void enableOrientationChangeJNI();
 	extern void setOrientationLandscapeJNI();
 	extern void setOrientationPortraitJNI();
+	
+	// added by YoungJae Kwon
+	extern void playVideoJNI(const char* url);
 }
 
 #endif // __ANDROID_MESSAGE_JNI_H__
